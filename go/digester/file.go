@@ -2,7 +2,6 @@ package digester
 
 import (
 	"crypto/sha256"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
@@ -15,7 +14,8 @@ import (
 // 	Sha256  string `json:"sha256"`
 
 type DigestInfo struct {
-	Name    string      `json:"name"`
+	Path    string      `json:"path"`
+	Size    int64       `json:"size"`
 	ModTime time.Time   `json:"mod_time"`
 	Mode    os.FileMode `json:"mode"`
 	Sha256  string      `json:"sha256"`
@@ -42,7 +42,8 @@ func File(path string, fileInfo os.FileInfo) (DigestInfo, error) {
 	}
 
 	return DigestInfo{
-		Name:    path,
+		Path:    path,
+		Size:    fileInfo.Size(),
 		ModTime: fileInfo.ModTime().UTC(),
 		Mode:    fileInfo.Mode(),
 		// same as hex.EncodeToString(sha[:])
@@ -50,10 +51,10 @@ func File(path string, fileInfo os.FileInfo) (DigestInfo, error) {
 	}, nil
 }
 
-func EncodeJSON(fileInfo DigestInfo) ([]byte, error) {
-	jsonBytes, err := json.MarshalIndent(fileInfo, "", "  ")
-	if err != nil {
-		return nil, err
-	}
-	return jsonBytes, nil
-}
+// func EncodeJSON(fileInfo DigestInfo) ([]byte, error) {
+// 	jsonBytes, err := json.MarshalIndent(fileInfo, "", "  ")
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return jsonBytes, nil
+// }

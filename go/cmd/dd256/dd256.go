@@ -33,10 +33,15 @@ func main() {
 		// If the path is a directory, print the directory name
 		if info.IsDir() {
 			log.Println("Directory:", path)
-			jsonBytes, err := digester.Directory(path)
+			digests, err := digester.Directory(path)
 			if err != nil {
 				return err
 			}
+			jsonBytes, err := json.Marshal(digests)
+			if err != nil {
+				return nil
+			}
+
 			fmt.Println(string(jsonBytes))
 			return nil
 		}

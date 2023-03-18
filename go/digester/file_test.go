@@ -5,6 +5,17 @@ import (
 	"testing"
 )
 
+// Use like this:
+//   teardown := setup(t)
+//   defer teardown(t)
+//
+// func setup(t *testing.T) func(t *testing.T) {
+// 	t.Log("setup test")
+// 	return func(t *testing.T) {
+// 		t.Log("teardown test")
+// 	}
+// }
+
 func TestFileDigest(t *testing.T) {
 	// Create a temporary file for testing
 	file, err := os.CreateTemp("", "fileinfo-test")
@@ -37,8 +48,8 @@ func TestFileDigest(t *testing.T) {
 	}
 
 	// Check the fields of the FileInfo struct
-	if digestInfo.Name != file.Name() {
-		t.Errorf("Expected name %q, but got %q", file.Name(), digestInfo.Name)
+	if digestInfo.Path != file.Name() {
+		t.Errorf("Expected name %q, but got %q", file.Name(), digestInfo.Path)
 	}
 
 	if digestInfo.ModTime.Unix() != fileInfo.ModTime().Unix() {
