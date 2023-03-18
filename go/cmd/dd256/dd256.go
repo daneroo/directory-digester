@@ -6,8 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
+
+	// "github.com/daneroo/directory-digester/go/logsetup"
+	"github.com/daneroo/directory-digester/go/logsetup"
 )
 
 type FileInfo struct {
@@ -18,9 +22,17 @@ type FileInfo struct {
 }
 
 func main() {
+	logsetup.SetupFormat()
+
 	// Define the directory to walk recursively
 	// root := "path/to/root/directory"
 	root := "/Users/daniel/Downloads"
+	if len(os.Args) > 1 {
+		root = os.Args[len(os.Args)-1]
+	}
+
+	log.Printf("directory-digester root:%s\n", root) // TODO(daneroo): add version,buildDate
+	// log.
 
 	// Call the filepath.Walk function to recursively walk the directory tree
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
@@ -30,30 +42,15 @@ func main() {
 
 		// If the path is a directory, print the directory name
 		if info.IsDir() {
-			fmt.Println("Directory:", path)
+			log.Println("Directory:", path)
 			return nil
 		}
 
 		// Create a FileInfo struct for the file
-		fileInfo := FileInfo{
-			Name:    path,
-			ModTime: info.ModTime().String(),
-			Mode:    info.Mode().String(),
-		}
-
-		// Open the file
-		file, err := os.Open(path)
+		fileInfo, err := fileInfo(path, info)
 		if err != nil {
 			return err
 		}
-		defer file.Close()
-
-		// Calculate the sha256 digest of the file
-		hasher := sha256.New()
-		if _, err := io.Copy(hasher, file); err != nil {
-			return err
-		}
-		fileInfo.Sha256 = hex.EncodeToString(hasher.Sum(nil))
 
 		// Encode the FileInfo struct as JSON and print it
 		fileInfoJson, err := json.Marshal(fileInfo)
@@ -67,6 +64,30 @@ func main() {
 
 	// Check for any errors while walking the directory tree
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Fatal(err)
 	}
+}
+
+// given info as a os.FileInfo return a FileInfo struct, or error if unable to open file or calculate sha256
+func fileInfo(path string, info os.FileInfo) (*FileInfo, error) {
+	fileInfo := &FileInfo{
+		Name:    info.Name(),
+		ModTime: info.ModTime().String(),
+		Mode:    info.Mode().String(),
+	}
+	// Open the file
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	// Calculate the sha256 digest of the file
+	digester := sha256.New()
+	if _, err := io.Copy(digester, file); err != nil {
+		return nil, err
+	}
+	fileInfo.Sha256 = hex.EncodeToString(digester.Sum(nil))
+
+	return fileInfo, nil
 }

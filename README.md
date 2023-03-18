@@ -2,7 +2,7 @@
 
 `directory-digester` is a tool to produce message digests for files and directories.
 
-It has similar goals to `md5deep` (a.k.a `hashdeep`) but,
+It has similar goals to [`md5deep`](https://github.com/jessek/hashdeep) (a.k.a `hashdeep`) but,
 
 - it also produces digests for directories themselves as defined below.
 - it also produces digests that account for file name, size, permissions modification time.
