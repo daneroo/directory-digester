@@ -3,11 +3,19 @@ package main
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 )
+
+type FileInfo struct {
+	Name    string `json:"name"`
+	ModTime string `json:"mod_time"`
+	Mode    string `json:"mode"`
+	Sha256  string `json:"sha256"`
+}
 
 func main() {
 	// Define the directory to walk recursively
@@ -26,14 +34,12 @@ func main() {
 			return nil
 		}
 
-		// Print the file name
-		fmt.Println("File:", path)
-
-		// Print the last modification time
-		fmt.Println("Last modified:", info.ModTime())
-
-		// Print the permissions mode
-		fmt.Println("Permissions mode:", info.Mode().String(), "(", info.Mode(), ")")
+		// Create a FileInfo struct for the file
+		fileInfo := FileInfo{
+			Name:    path,
+			ModTime: info.ModTime().String(),
+			Mode:    info.Mode().String(),
+		}
 
 		// Open the file
 		file, err := os.Open(path)
@@ -47,8 +53,14 @@ func main() {
 		if _, err := io.Copy(hasher, file); err != nil {
 			return err
 		}
-		digest := hex.EncodeToString(hasher.Sum(nil))
-		fmt.Println("SHA256 digest:", digest)
+		fileInfo.Sha256 = hex.EncodeToString(hasher.Sum(nil))
+
+		// Encode the FileInfo struct as JSON and print it
+		fileInfoJson, err := json.Marshal(fileInfo)
+		if err != nil {
+			return err
+		}
+		fmt.Println(string(fileInfoJson))
 
 		return nil
 	})
