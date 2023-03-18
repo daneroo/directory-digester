@@ -3,6 +3,17 @@
 Not sure how to layout the directories yet. Especiall for a multi-language project.
 See [this article](https://appliedgo.com/blog/go-project-layout/) for some ideas.
 
+## Invoke tests
+
+```bash
+go test ./...
+# or from the repository root:
+go test -v ./go/...
+
+```
+
+## Setup
+
 ```bash
 # setup in this directory
 go mod init github.com/daneroo/directory-digester/go

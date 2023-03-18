@@ -1,25 +1,15 @@
 package main
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"os"
 	"path/filepath"
 
-	// "github.com/daneroo/directory-digester/go/logsetup"
+	"github.com/daneroo/directory-digester/go/digester"
 	"github.com/daneroo/directory-digester/go/logsetup"
 )
-
-type FileInfo struct {
-	Name    string `json:"name"`
-	ModTime string `json:"mod_time"`
-	Mode    string `json:"mode"`
-	Sha256  string `json:"sha256"`
-}
 
 func main() {
 	logsetup.SetupFormat()
@@ -43,21 +33,26 @@ func main() {
 		// If the path is a directory, print the directory name
 		if info.IsDir() {
 			log.Println("Directory:", path)
+			jsonBytes, err := digester.Directory(path)
+			if err != nil {
+				return err
+			}
+			fmt.Println(string(jsonBytes))
 			return nil
 		}
 
 		// Create a FileInfo struct for the file
-		fileInfo, err := fileInfo(path, info)
+		digestInfo, err := digester.File(path, info)
 		if err != nil {
 			return err
 		}
 
 		// Encode the FileInfo struct as JSON and print it
-		fileInfoJson, err := json.Marshal(fileInfo)
+		digestJson, err := json.Marshal(digestInfo)
 		if err != nil {
 			return err
 		}
-		fmt.Println(string(fileInfoJson))
+		fmt.Println(string(digestJson))
 
 		return nil
 	})
@@ -66,28 +61,4 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-// given info as a os.FileInfo return a FileInfo struct, or error if unable to open file or calculate sha256
-func fileInfo(path string, info os.FileInfo) (*FileInfo, error) {
-	fileInfo := &FileInfo{
-		Name:    info.Name(),
-		ModTime: info.ModTime().String(),
-		Mode:    info.Mode().String(),
-	}
-	// Open the file
-	file, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	// Calculate the sha256 digest of the file
-	digester := sha256.New()
-	if _, err := io.Copy(digester, file); err != nil {
-		return nil, err
-	}
-	fileInfo.Sha256 = hex.EncodeToString(digester.Sum(nil))
-
-	return fileInfo, nil
 }
