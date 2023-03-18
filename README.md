@@ -15,3 +15,12 @@ At the simplest level, it produces a digest for a file's content.
 - Could distinguish between content only digests and content + metadata digests.
 - Could include compare/verify functionality.
 - Could include filtering functionality. (exclude file patterns for example)
+
+
+## Digests for directories
+
+- traversal order: lexicographic
+- if file - print json line
+- if directory 
+  - descend into directory and print json line for each entry
+  - then print json line for directory itself

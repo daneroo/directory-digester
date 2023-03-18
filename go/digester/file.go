@@ -5,21 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"time"
 )
-
-// 	Name    string `json:"name"`
-// 	ModTime string `json:"mod_time"`
-// 	Mode    string `json:"mode"`
-// 	Sha256  string `json:"sha256"`
-
-type DigestInfo struct {
-	Path    string      `json:"path"`
-	Size    int64       `json:"size"`
-	ModTime time.Time   `json:"mod_time"`
-	Mode    os.FileMode `json:"mode"`
-	Sha256  string      `json:"sha256"`
-}
 
 func File(path string, fileInfo os.FileInfo) (DigestInfo, error) {
 	// Get the file info
@@ -50,11 +36,3 @@ func File(path string, fileInfo os.FileInfo) (DigestInfo, error) {
 		Sha256: fmt.Sprintf("%x", digester.Sum(nil)),
 	}, nil
 }
-
-// func EncodeJSON(fileInfo DigestInfo) ([]byte, error) {
-// 	jsonBytes, err := json.MarshalIndent(fileInfo, "", "  ")
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return jsonBytes, nil
-// }

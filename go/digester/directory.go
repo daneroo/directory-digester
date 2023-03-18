@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 )
 
+// Get the DigesterInfo for a directory
 func Directory(dirPath string) ([]DigestInfo, error) {
 	var files []DigestInfo
 

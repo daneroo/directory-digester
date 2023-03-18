@@ -20,9 +20,7 @@ func main() {
 	if len(os.Args) > 1 {
 		root = os.Args[len(os.Args)-1]
 	}
-
 	log.Printf("directory-digester root:%s\n", root) // TODO(daneroo): add version,buildDate
-	// log.
 
 	// Call the filepath.Walk function to recursively walk the directory tree
 	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
