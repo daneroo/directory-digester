@@ -38,7 +38,7 @@ func buildTree(parentNode *TreeNode, parentPath string) {
 }
 
 func showTree(node TreeNode, depth int) {
-	pad := fmt.Sprintf("%*s", depth*2, " ")
+	pad := fmt.Sprintf("%*s", depth*2, "")
 	fmt.Printf("%s%s - (%d)\n", pad, node.Info.Name(), len(node.Children))
 	// fmt.Printf("%s%s - (%d)\n", pad, node.Path, len(node.Children))
 	for _, child := range node.Children {
@@ -66,6 +66,7 @@ func main() {
 	}
 
 	buildTree(&rootNode, root)
-	log.Printf("-- built tree : %s (%d)\n", rootNode.Info.Name(), len(rootNode.Children))
+	log.Printf("-- built tree : %s (%d)\n\n", rootNode.Info.Name(), len(rootNode.Children))
+	fmt.Printf("-- built tree : %s (%d)\n\n", rootNode.Info.Name(), len(rootNode.Children))
 	showTree(rootNode, 0)
 }
