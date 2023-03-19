@@ -14,7 +14,7 @@ import (
 type TreeNode struct {
 	Path     string
 	Info     os.FileInfo
-	Children []*TreeNode
+	Children []TreeNode
 }
 
 func newLeaf(path string, info os.FileInfo) TreeNode {
@@ -46,7 +46,7 @@ func buildTree(parentPath string, parentInfo fs.FileInfo) (TreeNode, error) {
 				return TreeNode{}, err
 			}
 		}
-		parentNode.Children = append(parentNode.Children, &node)
+		parentNode.Children = append(parentNode.Children, node)
 	}
 	return parentNode, nil
 }
@@ -59,7 +59,7 @@ func showTree(node TreeNode, depth int) {
 	}
 	fmt.Printf("%s%s%s\n", pad, node.Info.Name(), isDirIndicator)
 	for _, child := range node.Children {
-		showTree(*child, depth+1)
+		showTree(child, depth+1)
 	}
 }
 
