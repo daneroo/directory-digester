@@ -11,11 +11,15 @@ At the simplest level, it produces a digest for a file's content.
 
 ## Stretch goals
 
-- Could use different algorithms, including SHA-1, SHA-256, SHA-512, and SHA-3.
+- Should have multiple implementations (go, typescript (node,deno), rust)
 - Could distinguish between content only digests and content + metadata digests.
 - Could include compare/verify functionality.
+  - should compare visually like [difftastic](https://github.com/Wilfred/difftastic)
+  - could compare on different hosts
+  - could compare using nats as a message bus
+  - could compare using ipfs as a signing mechanism
 - Could include filtering functionality. (exclude file patterns for example)
-
+- Could use different algorithms, including SHA-1, SHA-256, SHA-512, and SHA-3.
 
 ## Digests for directories
 
@@ -26,5 +30,7 @@ At the simplest level, it produces a digest for a file's content.
   - then print json line for directory itself
 
 ## Reference Implementation
+
+Let's start with a simple, reference implementation in go. That does not optimize for memory or speed.
 
 - see reffile
