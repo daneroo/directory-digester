@@ -1,6 +1,5 @@
 # reference implementaion
 
-
 Let's get this as simple as possible.
 
 This implementation only builds a tree of directories and files.
@@ -15,14 +14,14 @@ type TreeNode struct {
   Children []TreeNode
 }
 
-type DigestTree struct {
+// to
+type DigestTreeNode struct {
   Path     string
   Info     DigestInfo
   Children []DigestTree
 }
 
 type DigestInfo struct {
-  Path    string      `json:"path"`
   Name    string      `json:"name"`
   Size    int64       `json:"size"`
   ModTime time.Time   `json:"mod_time"`
@@ -31,3 +30,8 @@ type DigestInfo struct {
 }
 ```
 
+## Benchmarking
+
+```bash
+go build go/cmd/ref/ref.go; hyperfine './ref go'
+```

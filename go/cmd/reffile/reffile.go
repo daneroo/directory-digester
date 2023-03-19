@@ -82,6 +82,5 @@ func main() {
 		panic(err)
 	}
 	log.Printf("-- built tree : %s (%d)\n\n", rootNode.Info.Name(), len(rootNode.Children))
-	fmt.Printf("-- built tree : %s (%d)\n\n", rootNode.Info.Name(), len(rootNode.Children))
 	showTree(rootNode, 0)
 }
