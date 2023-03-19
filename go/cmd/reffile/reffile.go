@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"os"
@@ -16,31 +17,47 @@ type TreeNode struct {
 	Children []*TreeNode
 }
 
-func buildTree(parentNode *TreeNode, parentPath string) {
+func newLeaf(path string, info os.FileInfo) TreeNode {
+	return TreeNode{
+		Path: path,
+		Info: info,
+	}
+}
 
+func buildTree(parentPath string, parentInfo fs.FileInfo) (TreeNode, error) {
+	log.Printf("buildTree(%s)\n", parentPath)
+	parentNode := newLeaf(parentPath, parentInfo)
+
+	// The children of the node we are building : could be empty (dir)
 	files, err := ioutil.ReadDir(parentPath)
 	if err != nil {
-		panic(err)
+		return TreeNode{}, err
 	}
 
 	for _, file := range files {
-		node := TreeNode{
-			Path: filepath.Join(parentPath, file.Name()),
-			Info: file,
-		}
+		path := filepath.Join(parentPath, file.Name())
 
-		if file.IsDir() {
-			buildTree(&node, filepath.Join(parentPath, file.Name()))
+		var node TreeNode
+		if !file.IsDir() { // not a directory, so leaf node
+			node = newLeaf(path, file)
+		} else { // directory, so recurse
+			node, err = buildTree(path, file)
+			if err != nil {
+				return TreeNode{}, err
+			}
 		}
-
 		parentNode.Children = append(parentNode.Children, &node)
 	}
+	return parentNode, nil
 }
 
 func showTree(node TreeNode, depth int) {
 	pad := fmt.Sprintf("%*s", depth*2, "")
-	fmt.Printf("%s%s - (%d)\n", pad, node.Info.Name(), len(node.Children))
-	// fmt.Printf("%s%s - (%d)\n", pad, node.Path, len(node.Children))
+	isDirIndicator := "" // "🍁" // leaf
+	if node.Info.IsDir() {
+		isDirIndicator = fmt.Sprintf("/ (%d)", len(node.Children))
+	}
+	fmt.Printf("%s%s%s\n", pad, node.Info.Name(), isDirIndicator)
 	for _, child := range node.Children {
 		showTree(*child, depth+1)
 	}
@@ -56,16 +73,14 @@ func main() {
 	}
 	log.Printf("directory-digester root:%s\n", root) // TODO(daneroo): add version,buildDate
 
-	info, err := os.Stat(root)
+	rootInfo, err := os.Stat(root)
 	if err != nil {
 		panic(err)
 	}
-	rootNode := TreeNode{
-		Path: root,
-		Info: info,
+	rootNode, err := buildTree(root, rootInfo)
+	if err != nil {
+		panic(err)
 	}
-
-	buildTree(&rootNode, root)
 	log.Printf("-- built tree : %s (%d)\n\n", rootNode.Info.Name(), len(rootNode.Children))
 	fmt.Printf("-- built tree : %s (%d)\n\n", rootNode.Info.Name(), len(rootNode.Children))
 	showTree(rootNode, 0)
