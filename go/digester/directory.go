@@ -1,6 +1,7 @@
 package digester
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 )
@@ -21,6 +22,12 @@ func Directory(dirPath string) ([]DigestInfo, error) {
 				return err
 			}
 			files = append(files, digestInfo)
+		} else {
+			// fmt.Println("Directory: ", path)
+			if path != dirPath {
+				fmt.Println("skip Directory: ", path)
+				return filepath.SkipDir
+			}
 		}
 
 		return nil
