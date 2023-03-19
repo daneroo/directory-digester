@@ -1,7 +1,11 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/json"
+	"flag"
 	"fmt"
+	"io"
 	"io/fs"
 	"log"
 	"os"
@@ -45,8 +49,53 @@ func newLeaf(path string, info fs.FileInfo) DigestTreeNode {
 	}
 }
 
+// setSizeOfParent: sets the size of the parent node by summing the size of the children
+func setSizeOfParent(node *DigestTreeNode) {
+	// sum the size of the children
+	var size int64
+	for _, child := range node.Children {
+		size += child.Info.Size
+	}
+	node.Info.Size = size
+}
+
+// digestNode: calculates the digest of a node
+// This can be invoked on a leaf node, or a directory node.
+// On the directory it is assumed that the children have been previously digested
+func digestNode(node *DigestTreeNode) error {
+	digester := sha256.New()
+	if !node.Info.Mode.IsDir() {
+		// Calculate the sha256 digest of the file
+		file, err := os.Open(node.Path)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		if _, err := io.Copy(digester, file); err != nil {
+			return err
+		}
+		node.Info.Sha256 = fmt.Sprintf("%x", digester.Sum(nil))
+		if *verboseFlag {
+			log.Printf("digestNode(%s) = %s (leaf)\n", node.Path, node.Info.Sha256)
+		}
+	} else {
+		// Calculate the sha256 digest of the children
+		for _, child := range node.Children {
+			digester.Write([]byte(child.Info.Sha256))
+		}
+		node.Info.Sha256 = fmt.Sprintf("%x", digester.Sum(nil))
+		if *verboseFlag {
+			log.Printf("digestNode(%s) = %s (node)\n", node.Path, node.Info.Sha256)
+		}
+	}
+	return nil
+}
+
 func buildTree(parentPath string, parentInfo fs.FileInfo) (DigestTreeNode, error) {
-	log.Printf("buildTree(%s)\n", parentPath)
+	if *verboseFlag {
+		log.Printf("buildTree(%s)\n", parentPath)
+	}
 	parentNode := newLeaf(parentPath, parentInfo)
 
 	// The children of the node we are building : could be empty (dir)
@@ -61,13 +110,18 @@ func buildTree(parentPath string, parentInfo fs.FileInfo) (DigestTreeNode, error
 
 	for _, file := range files {
 		path := filepath.Join(parentPath, file.Name())
-		info, err := file.Info()
+		info, err := file.Info() // fs.DirEntry.Info() may throw an error
 		if err != nil {
 			return DigestTreeNode{}, err
 		}
 		var node DigestTreeNode
 		if !file.IsDir() { // not a directory, so leaf node
 			node = newLeaf(path, info)
+			// digest of the leaf node
+			err = digestNode(&node)
+			if err != nil {
+				return DigestTreeNode{}, err
+			}
 		} else { // directory, so recurse
 			node, err = buildTree(path, info)
 			if err != nil {
@@ -76,39 +130,105 @@ func buildTree(parentPath string, parentInfo fs.FileInfo) (DigestTreeNode, error
 		}
 		parentNode.Children = append(parentNode.Children, node)
 	}
+	// This is where we can aggregate the size and digest of the children
+	setSizeOfParent(&parentNode)
+	err = digestNode(&parentNode)
+	if err != nil {
+		return DigestTreeNode{}, err
+	}
 	return parentNode, nil
 }
 
-func showTree(node DigestTreeNode, depth int) {
-	pad := fmt.Sprintf("%*s", depth*2, "")
-	isDirIndicator := "" // "🍁" // leaf
-	if node.Info.Mode.IsDir() {
-		isDirIndicator = fmt.Sprintf("/ (%d)", len(node.Children))
+func shortDigest(digest string, maxLength int) string {
+	if len(digest) > maxLength {
+		return digest[:(maxLength/2)] + ".." + digest[len(digest)-(maxLength/2):]
 	}
-	fmt.Printf("%s%s%s\n", pad, node.Info.Name, isDirIndicator)
+	return digest
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func maxNameLength(node DigestTreeNode, depth int) int {
+	max := len(node.Info.Name) + depth*2
 	for _, child := range node.Children {
-		showTree(child, depth+1)
+		max = maxInt(max, maxNameLength(child, depth+1))
+	}
+	return max
+}
+
+func showAsIndented(node DigestTreeNode, depth int, maxLength int) {
+	if (depth == 0) && (maxLength == 0) {
+		maxLength = maxNameLength(node, 0)
+	}
+	pad := fmt.Sprintf("%*s", depth*2, "")
+	isDirIndicator := " " // leaf or directory
+	if node.Info.Mode.IsDir() {
+		isDirIndicator = "/" //fmt.Sprintf("/ (%d)", len(node.Children))
+	}
+	fmt.Printf("%s%-*s%s - %10d bytes digest:%s\n", pad, maxLength-depth*2, node.Info.Name, isDirIndicator, node.Info.Size, shortDigest(node.Info.Sha256, 16))
+	for _, child := range node.Children {
+		showAsIndented(child, depth+1, maxLength)
 	}
 }
+
+func convertTreeToListWithPath(node DigestTreeNode, list *[]DigestInfo) {
+	nameAsPathInfo := node.Info
+	nameAsPathInfo.Name = node.Path
+	*list = append(*list, nameAsPathInfo)
+	for _, child := range node.Children {
+		convertTreeToListWithPath(child, list)
+	}
+}
+
+func showTreeAsJson(node DigestTreeNode) error {
+	var list []DigestInfo
+	convertTreeToListWithPath(node, &list)
+	// jsonBytes, err := json.MarshalIndent(list, "", "  ")
+	jsonBytes, err := json.Marshal(list)
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(jsonBytes))
+	return nil
+}
+
+// make this global so we can use it all over the place
+var verboseFlag = flag.Bool("verbose", false, "verbose output")
 
 func main() {
 	logsetup.SetupFormat()
 
-	// Define the directory to walk recursively
-	root := "/Users/daniel/Downloads"
-	if len(os.Args) > 1 {
-		root = os.Args[len(os.Args)-1]
-	}
-	log.Printf("directory-digester root:%s\n", root) // TODO(daneroo): add version,buildDate
+	// cli flags
+	// --verbose is global
+	var jsonFlag = flag.Bool("json", false, "json output")
+	flag.Parse()
 
-	rootInfo, err := os.Stat(root)
+	// Define the directory to walk recursively
+	rootDirectory := "/Users/daniel/Downloads"
+	if flag.NArg() > 0 {
+		rootDirectory = flag.Arg(0)
+	}
+	log.Printf("directory-digester root:%s\n", rootDirectory) // TODO(daneroo): add version,buildDate
+
+	rootInfo, err := os.Stat(rootDirectory)
 	if err != nil {
 		panic(err)
 	}
-	rootNode, err := buildTree(root, rootInfo)
+	rootNode, err := buildTree(rootDirectory, rootInfo)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("-- built tree : %s (%d)\n\n", rootNode.Info.Name, len(rootNode.Children))
-	showTree(rootNode, 0)
+	if *verboseFlag {
+		log.Printf("-- built tree : %s (%d)\n\n", rootNode.Info.Name, len(rootNode.Children))
+	}
+	if *jsonFlag {
+		showTreeAsJson(rootNode)
+	} else {
+		showAsIndented(rootNode, 0, 0)
+	}
 }

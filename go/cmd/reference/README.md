@@ -23,6 +23,12 @@ type DigestInfo struct {
 ## Running / Benchmarking
 
 ```bash
+time go run go/cmd/reference/reference.go --verbose go/
+# select just the name from json
+time go run go/cmd/reference/reference.go --json go/ 2>/dev/null | jq '.[] | .sha256'
+```
+
+```bash
 time go run go/cmd/reference/reference.go go/
 go build go/cmd/ref/ref.go; hyperfine './ref go'
 ```
