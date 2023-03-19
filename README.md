@@ -24,3 +24,7 @@ At the simplest level, it produces a digest for a file's content.
 - if directory 
   - descend into directory and print json line for each entry
   - then print json line for directory itself
+
+## Reference Implementation
+
+- see reffile
