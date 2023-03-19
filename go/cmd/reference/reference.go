@@ -31,7 +31,7 @@ type DigestInfo struct {
 func newDigestInfo(info fs.FileInfo) DigestInfo {
 	return DigestInfo{
 		Name:    info.Name(),
-		Size:    info.Size(), // not used for directories, will be replaced by sum of choildren
+		Size:    info.Size(), // not used for directories, will be replaced by sum of children
 		ModTime: info.ModTime(),
 		Mode:    info.Mode(),
 		// Sha256:  "",

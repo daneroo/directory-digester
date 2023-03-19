@@ -1,20 +1,10 @@
-# reference implementaion
+# reference implementation
 
 Let's get this as simple as possible.
-
-This implementation only builds a tree of directories and files.
 
 Using our own Leaf data structure
 
 ```go
-// from
-type TreeNode struct {
-  Path     string
-  Info     os.FileInfo
-  Children []TreeNode
-}
-
-// to
 type DigestTreeNode struct {
   Path     string
   Info     DigestInfo
@@ -30,8 +20,9 @@ type DigestInfo struct {
 }
 ```
 
-## Benchmarking
+## Running / Benchmarking
 
 ```bash
+time go run go/cmd/reference/reference.go go/
 go build go/cmd/ref/ref.go; hyperfine './ref go'
 ```
