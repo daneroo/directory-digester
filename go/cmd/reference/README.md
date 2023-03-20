@@ -4,6 +4,10 @@ Let's get this as simple as possible.
 
 Using our own Leaf data structure
 
+BUG: character encoding for filenames: fixed example: "/Volumes/Archive/media/audiobooks/Paul Halpern - Einstein's Dice and Schrodinger's Cat/.."
+
+## Data Structures
+
 ```go
 type DigestTreeNode struct {
   Path     string

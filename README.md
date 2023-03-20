@@ -23,9 +23,11 @@ At the simplest level, it produces a digest for a file's content.
 
 ## Digests for directories
 
+- The digest for a directory is the digest of the concatenation of the digests of the directory's entries.
+  - The digest for a directory's entry is the digest of the concatenation of the entry's name, size, permissions, modification time, and digest. (as JSON)
 - traversal order: lexicographic
 - if file - print json line
-- if directory 
+- if directory
   - descend into directory and print json line for each entry
   - then print json line for directory itself
 
