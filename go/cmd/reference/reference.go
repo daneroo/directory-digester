@@ -24,6 +24,7 @@ type DigestTreeNode struct {
 // This is likely the structure that will be serialized to JSON
 // There is a question of whether the full path (from root of our tree) should be used
 // for now, we are using Name (basename of Path), which appropriate for recursive display (with indentation)
+// TODO(daneroo): rename mod_time to mtime
 type DigestInfo struct {
 	Name    string      `json:"name"`
 	Size    int64       `json:"size"`
@@ -213,8 +214,9 @@ func main() {
 	if flag.NArg() > 0 {
 		rootDirectory = flag.Arg(0)
 	}
-	log.Printf("directory-digester root:%s\n", rootDirectory) // TODO(daneroo): add version,buildDate
+	log.Printf("directory-digester root: %s\n", rootDirectory) // TODO(daneroo): add version,buildDate
 
+	// TODO(daneroo) replace with newDigestInfo()
 	rootInfo, err := os.Stat(rootDirectory)
 	if err != nil {
 		panic(err)
@@ -224,7 +226,7 @@ func main() {
 		panic(err)
 	}
 	if *verboseFlag {
-		log.Printf("-- built tree : %s (%d)\n\n", rootNode.Info.Name, len(rootNode.Children))
+		log.Printf("-- built tree: %s (%d)\n\n", rootNode.Info.Name, len(rootNode.Children))
 	}
 	if *jsonFlag {
 		showTreeAsJson(rootNode)

@@ -1,3 +1,4 @@
 {
-  "cSpell.words": ["difftastic", "logsetup"]
+  "cSpell.words": ["difftastic", "logsetup"],
+  "deno.enable": true
 }
