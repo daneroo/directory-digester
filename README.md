@@ -35,8 +35,18 @@ At the simplest level, it produces a digest for a file's content.
 
 Let's start with a simple, reference implementation in go. That does not optimize for memory or speed.
 
-
 ## Publishing and Releasing
 
 This [article](https://namiops.medium.com/golang-multi-arch-docker-image-with-github-action-b59a62c8d2bd)
-ans [repo](https://github.com/namiops/go_multiarch/tree/master) have instructions on building a *Go* binary for multiple architectures and publishing it to a docker image.
+and [repo](https://github.com/namiops/go_multiarch/tree/master) have instructions on building a *Go* binary for multiple architectures and publishing them into a multi-arch docker image.
+
+## Till we get CI/CD and goreleaser working
+
+```bash
+# build
+./build/build-go.sh go/cmd/reference/reference.go
+
+#  from davinci,dirac,shannon: copy from galois
+scp -p galois:Downloads/directory-digester/reference.go-darwin-amd64 .
+#  for syno: copy from galois
+scp -p galois:Downloads/directory-digester/reference.go-linux-amd64 .

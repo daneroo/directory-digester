@@ -23,7 +23,6 @@ go build -ldflags="-X 'main.version=${VERSION}' -X 'main.commit=${COMMIT}' -X 'm
 # load test
 hyperfine './reference testDirectories/rootDir01/'
 hyperfine './reference  /Volumes/Space/archive/media/graphics/'
-
 ```
 
 ### Remotely (no git checkout)
