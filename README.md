@@ -37,6 +37,8 @@ Let's start with a simple, reference implementation in go. That does not optimiz
 
 ## Publishing and Releasing
 
+Git Branch Tagging: As per the `goreleaser` conventions we are tagging releases with `v0.1.0` format.
+
 This [article](https://namiops.medium.com/golang-multi-arch-docker-image-with-github-action-b59a62c8d2bd)
 and [repo](https://github.com/namiops/go_multiarch/tree/master) have instructions on building a *Go* binary for multiple architectures and publishing them into a multi-arch docker image.
 
