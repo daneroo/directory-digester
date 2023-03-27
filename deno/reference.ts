@@ -82,6 +82,10 @@ async function digestNode(node: DigestTreeNode): Promise<void> {
   }
 }
 
+function ignoreName(name: string): boolean {
+  const ignorePatterns = [".DS_Store", "@eaDir"];
+  return ignorePatterns.some((pattern) => name.match(pattern) != null);
+}
 async function buildTree(
   parentPath: string,
   parentInfo: Deno.FileInfo
@@ -97,14 +101,16 @@ async function buildTree(
   // children.sort((a, b) => a.name.localeCompare(b.name));
   children.sort((a, b) => (a.name > b.name ? 1 : a.name < b.name ? -1 : 0));
 
-  // console.log(
-  //   `buildTree(${parentPath}) = ${children.length} children: ${JSON.stringify(
-  //     children.map((child) => child.name)
-  //   )}`
-  // );
   for (const dirEntry of children) {
     const path = join(parentPath, dirEntry.name);
     const info = await Deno.stat(path);
+
+    // ignore patterns
+    const ignore = ignoreName(dirEntry.name);
+    if (ignore) {
+      logVerbose(`buildTree(${parentPath}) ignoring ${path}`);
+      continue;
+    }
 
     const node = info.isFile
       ? newLeaf(path, info)
