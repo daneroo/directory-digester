@@ -48,5 +48,8 @@ and [repo](https://github.com/namiops/go_multiarch/tree/master) have instruction
 
 #  from davinci,dirac,shannon: copy from galois
 scp -p galois:Downloads/directory-digester/reference.go-darwin-amd64 .
+time ./reference.go-darwin-amd64 --verbose  /Volumes/Space/archive/
 #  for syno: copy from galois
 scp -p galois:Downloads/directory-digester/reference.go-linux-amd64 .
+time ./reference.go-linux-amd64 --verbose  /volume1/Archive/
+```
