@@ -35,4 +35,8 @@ At the simplest level, it produces a digest for a file's content.
 
 Let's start with a simple, reference implementation in go. That does not optimize for memory or speed.
 
-- see reffile
+
+## Publishing and Releasing
+
+This [article](https://namiops.medium.com/golang-multi-arch-docker-image-with-github-action-b59a62c8d2bd)
+ans [repo](https://github.com/namiops/go_multiarch/tree/master) have instructions on building a *Go* binary for multiple architectures and publishing it to a docker image.
