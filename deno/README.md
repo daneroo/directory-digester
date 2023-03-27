@@ -5,8 +5,8 @@ This was ported from tor go reference implementation
 ## Usage
 
 ```bash
-deno run --allow-read deno/reference.ts --verbose testDirectories/rootDir02
-deno run --allow-read deno/reference.ts --json testDirectories/rootDir02 | jq '.[]|.sha256'
+deno run --allow-read deno/reference.ts --verbose testDirectories/rootDir01/
+deno run --allow-read deno/reference.ts --json testDirectories/rootDir01/ | jq '.[]|.sha256'
 ```
 
 ### Remotely (no git checkout)
