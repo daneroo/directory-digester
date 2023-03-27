@@ -15,6 +15,16 @@ import (
 	"github.com/daneroo/directory-digester/go/logsetup"
 )
 
+// export VERSION=$(git describe --dirty --always)
+// export COMMIT=$(git rev-parse --short HEAD)
+// export BUILDDATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+// go build -ldflags="-X 'main.version=${VERSION}' -X 'main.commit=${COMMIT}' -X 'main.buildDate=${BUILDDATE}'"
+var (
+	version   string = "0.0.0-dev"
+	commit    string = "feedbac" // "c0ffee5"
+	buildDate string = time.Now().UTC().Format(time.RFC3339)
+)
+
 type DigestTreeNode struct {
 	Path     string
 	Info     DigestInfo
@@ -93,6 +103,16 @@ func digestNode(node *DigestTreeNode) error {
 	return nil
 }
 
+func ignoreName(name string) bool {
+	ignorePatterns := []string{".DS_Store", "@eaDir"}
+	for _, pattern := range ignorePatterns {
+		if match, _ := filepath.Match(pattern, name); match {
+			return true
+		}
+	}
+	return false
+}
+
 func buildTree(parentPath string, parentInfo fs.FileInfo) (DigestTreeNode, error) {
 	if *verboseFlag {
 		log.Printf("buildTree(%s)\n", parentPath)
@@ -115,6 +135,16 @@ func buildTree(parentPath string, parentInfo fs.FileInfo) (DigestTreeNode, error
 		if err != nil {
 			return DigestTreeNode{}, err
 		}
+
+		// ignore patterns
+		ignore := ignoreName(file.Name())
+		if ignore {
+			if *verboseFlag {
+				log.Printf("buildTree(%s) ignoring %s\n", parentPath, path)
+			}
+			continue
+		}
+
 		var node DigestTreeNode
 		if !file.IsDir() { // not a directory, so leaf node
 			node = newLeaf(path, info)
@@ -214,7 +244,10 @@ func main() {
 	if flag.NArg() > 0 {
 		rootDirectory = flag.Arg(0)
 	}
-	log.Printf("directory-digester root: %s\n", rootDirectory) // TODO(daneroo): add version,buildDate
+	// These two lines are printed to stderr even if !verboseFlag
+	// TODO(daneroo) add a silent flag to suppress even these
+	log.Printf("directory-digester v%s - commit:%s - build:%s\n", version, commit, buildDate)
+	log.Printf("directory-digester root: %s\n", rootDirectory)
 
 	// TODO(daneroo) replace with newDigestInfo()
 	rootInfo, err := os.Stat(rootDirectory)

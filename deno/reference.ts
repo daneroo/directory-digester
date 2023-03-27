@@ -10,6 +10,19 @@ import {
   toHashString,
 } from "https://deno.land/std@0.180.0/crypto/mod.ts";
 
+// export VERSION=$(git describe --dirty --always)
+// export COMMIT=$(git rev-parse --short HEAD)
+// export BUILDDATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+// not sure how these would be packaged exposed
+// when running from repo:url, (perhaps as a json file in the repo?)
+// but they could be injected into a docker build as BUILD ARGS
+const buildInfo = {
+  // version: "0.0.0-dev",
+  version: Deno.env.get("VERSION") ?? "0.0.0-dev",
+  commit: Deno.env.get("COMMIT") ?? "feedbac", // "c0ffee5"
+  buildDate: Deno.env.get("BUILDDATE") ?? new Date().toISOString(),
+};
+
 interface DigestTreeNode {
   path: string;
   info: DigestInfo;
@@ -86,6 +99,7 @@ function ignoreName(name: string): boolean {
   const ignorePatterns = [".DS_Store", "@eaDir"];
   return ignorePatterns.some((pattern) => name.match(pattern) != null);
 }
+
 async function buildTree(
   parentPath: string,
   parentInfo: Deno.FileInfo
@@ -198,6 +212,25 @@ async function main() {
 
   const rootDirectory = String(dirAsStrOrNum);
 
+  // const buildInfo = JSON.parse(
+  //   Deno.runSync({
+  //     cmd: ["deno", "info", "--json"],
+  //     stdout: "piped",
+  //   }).stdout!
+  // );
+
+  // // Extract the relevant information
+  // const gitCommit = buildInfo.gitCommit ?? "unknown-commit";
+  // const buildTime =
+  //   new Date(buildInfo.buildTime).toISOString() ?? "unknown-time";
+  // const version = `1.0.0-${gitCommit}`;
+
+  // These two lines are printed to stdout even if !verbose
+  // TODO(daneroo) add a silent flag to suppress even these
+  log(
+    `directory-digester v${buildInfo.version} commit:${buildInfo.commit} build:${buildInfo.buildDate}`
+  ); // TODO(daneroo): add version,buildDate
+  // log.Printf("directory-digester root: %s\n", rootDirectory)
   log(`directory-digester root: ${rootDirectory}`); // TODO(daneroo): add version,buildDate
 
   const rootNode = await buildTree(

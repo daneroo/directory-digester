@@ -6,11 +6,28 @@ See [this article](https://appliedgo.com/blog/go-project-layout/) for some ideas
 ## Usage
 
 ```bash
-time go run go/cmd/reference/reference.go --verbose go/
-time go run go/cmd/reference/reference.go --json go/ | jq '.[]|.name'
+time go run go/cmd/reference/reference.go --verbose testDirectories/rootDir01/
+time go run go/cmd/reference/reference.go --json testDirectories/rootDir01/ | jq '.[]|.name'
+```
+
+For build:
+
+```bash
+export VERSION=$(git describe --dirty --always)
+export COMMIT=$(git rev-parse --short HEAD)
+export BUILDDATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+go build -ldflags="-X 'main.version=${VERSION}' -X 'main.commit=${COMMIT}' -X 'main.buildDate=${BUILDDATE}'" go/cmd/reference/reference.go; 
+# run
+./reference testDirectories/rootDir01/
+
+# load test
+hyperfine './reference testDirectories/rootDir01/'
+hyperfine './reference  /Volumes/Space/archive/media/graphics/'
+
 ```
 
 ### Remotely (no git checkout)
+
 This does not work. Cross compile, push exec to destination, and run there. Until we get CI/CD (go-releaser) working, both exec and docker
 
 ```bash

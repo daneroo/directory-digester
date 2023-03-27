@@ -28,11 +28,7 @@ type DigestInfo struct {
 
 ```bash
 time go run go/cmd/reference/reference.go --verbose testDirectories/rootDir01/
-# select just the digest from json
+# select just the digest or name from json
 time go run go/cmd/reference/reference.go --json testDirectories/rootDir01/ | jq '.[] | .sha256'
-```
-
-```bash
-time go run go/cmd/reference/reference.go testDirectories/rootDir01/
-go build go/cmd/reference/reference.go; hyperfine './reference testDirectories/rootDir01/'
+time go run go/cmd/reference/reference.go --json testDirectories/rootDir01/ | jq '.[] | .name'
 ```
