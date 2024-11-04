@@ -1,14 +1,16 @@
-// TODO(daneroo): move external dependencies to deps.ts
-import { parse } from "https://deno.land/std@0.180.0/flags/mod.ts";
-import { basename, join } from "https://deno.land/std@0.180.0/path/mod.ts";
 // fs is for walk
 // import * as mod from "https://deno.land/std@0.180.0/fs/mod.ts";
-
 // crypto.digest on a file: see https://examples.deno.land/hashing/ by https://www.linolevan.com/blog/tea_xyz
 import {
   crypto,
   toHashString,
-} from "https://deno.land/std@0.180.0/crypto/mod.ts";
+} from 'https://deno.land/std@0.180.0/crypto/mod.ts';
+// TODO(daneroo): move external dependencies to deps.ts
+import { parse } from 'https://deno.land/std@0.180.0/flags/mod.ts';
+import {
+  basename,
+  join,
+} from 'https://deno.land/std@0.180.0/path/mod.ts';
 
 // export VERSION=$(git describe --dirty --always)
 // export COMMIT=$(git rev-parse --short HEAD)
@@ -228,7 +230,7 @@ async function main() {
   // These two lines are printed to stdout even if !verbose
   // TODO(daneroo) add a silent flag to suppress even these
   log(
-    `directory-digester v${buildInfo.version} commit:${buildInfo.commit} build:${buildInfo.buildDate}`
+    `directory-digester v${buildInfo.version} commit:${buildInfo.commit} build:${buildInfo.buildDate} deno:${Deno.version.deno}`
   ); // TODO(daneroo): add version,buildDate
   // log.Printf("directory-digester root: %s\n", rootDirectory)
   log(`directory-digester root: ${rootDirectory}`); // TODO(daneroo): add version,buildDate
