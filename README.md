@@ -40,7 +40,7 @@ Let's start with a simple, reference implementation in go. That does not optimiz
 Git Branch Tagging: As per the `goreleaser` conventions we are tagging releases with `v0.1.0` format.
 
 This [article](https://namiops.medium.com/golang-multi-arch-docker-image-with-github-action-b59a62c8d2bd)
-and [repo](https://github.com/namiops/go_multiarch/tree/master) have instructions on building a *Go* binary for multiple architectures and publishing them into a multi-arch docker image.
+and [repo](https://github.com/namiops/go_multiarch/tree/master) have instructions on building a _Go_ binary for multiple architectures and publishing them into a multi-arch docker image.
 
 ## Till we get CI/CD and goreleaser working
 
@@ -55,3 +55,33 @@ time ./reference.go-darwin-amd64 --verbose  /Volumes/Space/archive/
 scp -p galois:Downloads/directory-digester/reference.go-linux-amd64 .
 time ./reference.go-linux-amd64 --verbose  /volume1/Archive/
 ```
+
+## Performance
+
+We will need to balance CPU/digest and IO to optimize speed.
+
+Initial speed reference for **Go** version
+
+### `/Volumes/Space (estimate)
+
+| Machine | Estimated Time |
+| :------ | -------------: |
+| galois  |     1.79 hours |
+| davinci |     3.85 hours |
+| syno    |    25.43 hours |
+
+### Home-Movies
+
+| Machine | Time (s) | Data (MB) | Rate (MB/s) |
+| :------ | -------: | --------: | ----------: |
+| galois  |  346.751 |    130075 |      375.12 |
+| davinci |  799.854 |    130075 |      162.62 |
+| syno    | 2402.813 |    130075 |       54.13 |
+
+### Archive
+
+| Machine |  Time (s) | Data (MB) | Rate (MB/s) |
+| :------ | --------: | --------: | ----------: |
+| galois  |  2866.307 |   1015967 |      354.45 |
+| davinci |  6161.966 |   1015967 |      164.88 |
+| syno    | 40708.423 |   1015967 |       24.96 |
