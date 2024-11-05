@@ -25,6 +25,7 @@ bin_dir="${repo_root}/bin"
 build_host=$(hostname -f)
 cat << EOF
 # Building
+ version: ${VERSION} commit: ${COMMIT} buildDate: ${BUILDDATE}
  on ${build_host}
  into ${bin_dir}
 
