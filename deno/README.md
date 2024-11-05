@@ -11,10 +11,18 @@ deno run --allow-read --allow-env deno/reference.ts --json testDirectories/rootD
 deno run --allow-read --allow-env deno/reference.ts --json testDirectories/rootDir01/ | jq '.[]|.name'
 ```
 
-### Remotely (no git checkout)
+### Run from GitHub (jsr later, when published)
 
 ```bash
-deno run --allow-read --allow-env https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts --verbose  /Volumes/Space/archive/media/audiobooks/
-# with docker (on syno)
-docker run --rm -it -v /volume1/Archive/:/Volumes/Space/archive:ro denoland/deno:1.32.1 run --allow-read --allow-env https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts --verbose /Volumes/Space/archive/media/MAARIF-IRM/
+# with deno installed
+time deno run --allow-read --allow-env https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts --verbose  /Volumes/Space/Home-Movies/Tapes/
+
+# with docker  tag latest, or 2.0.4?
+# (on syno)
+docker pull denoland/deno:latest;
+time docker run --rm -it -v /volume1/Home-Movies/:/Volumes/Space/Home-Movies:ro denoland/deno:latest run --allow-read --allow-env https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts --verbose /Volumes/Space/Home-Movies/Tapes/
+
+# MacOS
+docker pull denoland/deno:latest;
+time docker run --rm -it -v /Volumes/Space/:/Volumes/Space/:ro denoland/deno:latest run --allow-read --allow-env https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts --verbose /Volumes/Space/Home-Movies/Tapes/
 ```

@@ -26,7 +26,7 @@ build_host=$(hostname -f)
 cat << EOF
 # Building
  on ${build_host}
- innto ${bin_dir}
+ into ${bin_dir}
 
 EOF
 

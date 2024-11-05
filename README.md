@@ -79,11 +79,16 @@ Initial speed reference for **Go** version
 | davinci |  6161.966 |   1015967 |      164.88 |
 | syno    | 40708.423 |   1015967 |       24.96 |
 
-### Home-Movies (deno)
+### Home-Movies (go/deno/deno-docker)
+
+Careful of caching. Even on Syno...
 
 | Machine | Exec        | Time (s) | Data (MB) | Rate (MB/s) |
 | :------ | :---------- | -------: | --------: | ----------: |
 | galois  | deno        |   76.469 |    130075 |     1701.02 |
-| galois  | deno/docker |   95.905 |    130075 |     1356.36 |
+| galois  | deno-docker |   95.905 |    130075 |     1356.36 |
+| galois  | go          |   77.660 |    130075 |     1674.93 |
 | davinci | deno        |  147.672 |    130075 |      880.84 |
-| syno    | deno/docker |  332.970 |    130075 |      390.65 |
+| davinci | go          |  137.182 |    130075 |      948.19 |
+| syno    | deno-docker |  332.970 |    130075 |      390.65 |
+| syno    | go          |   75.445 |    130075 |     1724.10 |
