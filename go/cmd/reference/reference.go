@@ -77,6 +77,8 @@ func setSizeOfParent(node *DigestTreeNode) {
 func digestNode(node *DigestTreeNode) error {
 	digester := sha256.New()
 	if !node.Info.Mode.IsDir() {
+		start := time.Now()
+
 		// Calculate the sha256 digest of the file
 		file, err := os.Open(node.Path)
 		if err != nil {
@@ -88,8 +90,14 @@ func digestNode(node *DigestTreeNode) error {
 			return err
 		}
 		node.Info.Sha256 = fmt.Sprintf("%x", digester.Sum(nil))
+
+		elapsed := time.Since(start).Seconds()
+		sizeMB := float64(node.Info.Size) / 1024 / 1024
+		rate := sizeMB / elapsed
+
 		if *verboseFlag {
-			log.Printf("digestNode(%s) = %s (leaf)\n", node.Path, node.Info.Sha256)
+			log.Printf("digestNode(%s) = %s (leaf) - size: %.2fMB elapsed: %.2fs rate: %.2f MB/s\n",
+				node.Path, node.Info.Sha256, sizeMB, elapsed, rate)
 		}
 	} else {
 		// Calculate the sha256 digest of the children
@@ -103,7 +111,6 @@ func digestNode(node *DigestTreeNode) error {
 	}
 	return nil
 }
-
 func ignoreName(name string) bool {
 	ignorePatterns := []string{".DS_Store", "@eaDir"}
 	for _, pattern := range ignorePatterns {
@@ -252,6 +259,8 @@ func main() {
 	log.Printf("directory-digester root: %s\n", rootDirectory)
 
 	// TODO(daneroo) replace with newDigestInfo()
+	start := time.Now()
+
 	rootInfo, err := os.Stat(rootDirectory)
 	if err != nil {
 		panic(err)
@@ -260,8 +269,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
+	elapsed := time.Since(start).Seconds()
+	totalSizeMB := float64(rootNode.Info.Size) / 1024 / 1024
+	rate := totalSizeMB / elapsed
+
 	if *verboseFlag {
-		log.Printf("-- built tree: %s (%d)\n\n", rootNode.Info.Name, len(rootNode.Children))
+
+		log.Printf("built tree: %s files: %d - size: %.2fMB  elapsed:  %.2fs rate: %.2f MB/s\n",
+			rootNode.Info.Name,
+			len(rootNode.Children),
+			totalSizeMB,
+			elapsed,
+			rate)
 	}
 	if *jsonFlag {
 		showTreeAsJson(rootNode)
