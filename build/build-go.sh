@@ -20,12 +20,22 @@ export VERSION=$(git describe --dirty --always)
 export COMMIT=$(git rev-parse --short HEAD)
 export BUILDDATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+bin_dir="${repo_root}/bin"
+build_host=$(hostname -f)
+cat << EOF
+# Building
+ on ${build_host}
+ innto ${bin_dir}
+
+EOF
+
 for platform in "${platforms[@]}"
 do
 	platform_split=(${platform//\// })
 	export GOOS=${platform_split[0]}
 	export GOARCH=${platform_split[1]}
-	output_name=$package_name'-'$GOOS'-'$GOARCH
+	output_name=${bin_dir}/${package_name}'-'${GOOS}'-'${GOARCH}
 	if [ $GOOS = "windows" ]; then
 		output_name+='.exe'
 	fi	
@@ -37,4 +47,18 @@ do
 		exit 1
 	fi
   echo Built: $output_name GOOS=$GOOS GOARCH=$GOARCH
+
 done
+
+cat << EOF
+
+# Pull the new binaries from this machine (${build_host})
+
+# from davinci, shannon: copy from galois"
+scp -p ${build_host}:${bin_dir}/reference.go-darwin-arm64 ./directory-digester-reference.go-darwin-arm64
+time ./directory-digester-reference.go-darwin-arm64 --verbose  /Volumes/Space/Home-Movies/Tapes/
+
+# from syno: copy from galois
+scp -p ${build_host}:${bin_dir}/reference.go-linux-amd64 ./directory-digester-reference.go-linux-amd64
+time ./directory-digester-reference.go-linux-amd64 --verbose  /volume1/Home-Movies/Tapes/
+EOF

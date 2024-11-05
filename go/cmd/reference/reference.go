@@ -10,6 +10,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"runtime"
 	"time"
 
 	"github.com/daneroo/directory-digester/go/logsetup"
@@ -20,7 +21,7 @@ import (
 // export BUILDDATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 // go build -ldflags="-X 'main.version=${VERSION}' -X 'main.commit=${COMMIT}' -X 'main.buildDate=${BUILDDATE}'"
 var (
-	version   string = "0.0.0-dev"
+	version   string = "v0.0.0-dev"
 	commit    string = "feedbac" // "c0ffee5"
 	buildDate string = time.Now().UTC().Format(time.RFC3339)
 )
@@ -246,7 +247,8 @@ func main() {
 	}
 	// These two lines are printed to stderr even if !verboseFlag
 	// TODO(daneroo) add a silent flag to suppress even these
-	log.Printf("directory-digester v%s - commit:%s - build:%s\n", version, commit, buildDate)
+	log.Printf("directory-digester %s - commit:%s - build:%s - %s\n", version, commit, buildDate, runtime.Version())
+
 	log.Printf("directory-digester root: %s\n", rootDirectory)
 
 	// TODO(daneroo) replace with newDigestInfo()

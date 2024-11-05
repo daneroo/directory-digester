@@ -47,13 +47,6 @@ and [repo](https://github.com/namiops/go_multiarch/tree/master) have instruction
 ```bash
 # build
 ./build/build-go.sh go/cmd/reference/reference.go
-
-#  from davinci,dirac,shannon: copy from galois
-scp -p galois:Downloads/directory-digester/reference.go-darwin-amd64 .
-time ./reference.go-darwin-amd64 --verbose  /Volumes/Space/archive/
-#  for syno: copy from galois
-scp -p galois:Downloads/directory-digester/reference.go-linux-amd64 .
-time ./reference.go-linux-amd64 --verbose  /volume1/Archive/
 ```
 
 ## Performance
@@ -85,3 +78,12 @@ Initial speed reference for **Go** version
 | galois  |  2866.307 |   1015967 |      354.45 |
 | davinci |  6161.966 |   1015967 |      164.88 |
 | syno    | 40708.423 |   1015967 |       24.96 |
+
+### Home-Movies (deno)
+
+| Machine | Exec        | Time (s) | Data (MB) | Rate (MB/s) |
+| :------ | :---------- | -------: | --------: | ----------: |
+| galois  | deno        |   76.469 |    130075 |     1701.02 |
+| galois  | deno/docker |   95.905 |    130075 |     1356.36 |
+| davinci | deno        |  147.672 |    130075 |      880.84 |
+| syno    | deno/docker |  332.970 |    130075 |      390.65 |
