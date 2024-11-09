@@ -42,11 +42,13 @@ Git Branch Tagging: As per the `goreleaser` conventions we are tagging releases 
 This [article](https://namiops.medium.com/golang-multi-arch-docker-image-with-github-action-b59a62c8d2bd)
 and [repo](https://github.com/namiops/go_multiarch/tree/master) have instructions on building a _Go_ binary for multiple architectures and publishing them into a multi-arch docker image.
 
-## Till we get CI/CD and goreleaser working
+## Building
+
+To build the multi-architecture Go implementation (`./bin/`):
 
 ```bash
 # build
-./build/build-go.sh go/cmd/reference/reference.go
+./scripts/build-go.sh go/cmd/reference/reference.go
 ```
 
 ## Performance
@@ -69,7 +71,7 @@ time deno run --allow-read --allow-env deno/reference.ts --verbose testDirectori
 Careful of caching. Even on Syno...
 
 | Machine | Exec        | Time (s) | Data (MB) | Rate (MB/s) |
-| :------ | :---------- | -------: | --------: | ----------: |
+|:--------|:------------|---------:|----------:|------------:|
 | galois  | deno        |   76.469 |    130075 |     1701.02 |
 | galois  | deno-docker |   95.905 |    130075 |     1356.36 |
 | davinci | deno        |  147.672 |    130075 |      880.84 |
@@ -81,7 +83,7 @@ Careful of caching. Even on Syno...
 ### Reading/audiobooks
 
 | Machine | Exec | Time (s) | Data (MB) | Rate (MB/s) |
-| :------ | :--- | -------: | --------: | ----------: |
+|:--------|:-----|---------:|----------:|------------:|
 | galois  | go   |  1102.88 |    325593 |      295.22 |
 | galois  | deno |  1092.59 |    325593 |      298.00 |
 | davinci | go   |  2030.87 |    325593 |      160.32 |
