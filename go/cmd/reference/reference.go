@@ -256,7 +256,7 @@ func main() {
 	// TODO(daneroo) add a silent flag to suppress even these
 	log.Printf("directory-digester %s - commit:%s - build:%s - %s\n", version, commit, buildDate, runtime.Version())
 
-	log.Printf("directory-digester root: %s\n", rootDirectory)
+	log.Printf("directory-digester start root: %s\n", rootDirectory)
 
 	// TODO(daneroo) replace with newDigestInfo()
 	start := time.Now()
@@ -274,15 +274,12 @@ func main() {
 	totalSizeMB := float64(rootNode.Info.Size) / 1024 / 1024
 	rate := totalSizeMB / elapsed
 
-	if *verboseFlag {
-
-		log.Printf("built tree: %s files: %d - size: %.2fMB  elapsed:  %.2fs rate: %.2f MB/s\n",
-			rootNode.Info.Name,
-			len(rootNode.Children),
-			totalSizeMB,
-			elapsed,
-			rate)
-	}
+	log.Printf("directory-digester done  root: %s files: %d - size: %.2fMB  elapsed:  %.2fs rate: %.2f MB/s\n",
+		rootNode.Info.Name,
+		len(rootNode.Children),
+		totalSizeMB,
+		elapsed,
+		rate)
 	if *jsonFlag {
 		showTreeAsJson(rootNode)
 	} else {

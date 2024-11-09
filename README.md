@@ -53,31 +53,16 @@ and [repo](https://github.com/namiops/go_multiarch/tree/master) have instruction
 
 We will need to balance CPU/digest and IO to optimize speed.
 
-Initial speed reference for **Go** version
+## Operation
 
-### `/Volumes/Space (estimate)
-
-| Machine | Estimated Time |
-| :------ | -------------: |
-| galois  |     1.79 hours |
-| davinci |     3.85 hours |
-| syno    |    25.43 hours |
-
-### Home-Movies
-
-| Machine | Time (s) | Data (MB) | Rate (MB/s) |
-| :------ | -------: | --------: | ----------: |
-| galois  |  346.751 |    130075 |      375.12 |
-| davinci |  799.854 |    130075 |      162.62 |
-| syno    | 2402.813 |    130075 |       54.13 |
+```bash
+# go verbose, text output
+time go run go/cmd/reference/reference.go --verbose testDirectories/rootDir01/
+# deno verbose, text output
+time deno run --allow-read --allow-env deno/reference.ts --verbose testDirectories/rootDir01/
+```
 
 ### Archive
-
-| Machine |  Time (s) | Data (MB) | Rate (MB/s) |
-| :------ | --------: | --------: | ----------: |
-| galois  |  2866.307 |   1015967 |      354.45 |
-| davinci |  6161.966 |   1015967 |      164.88 |
-| syno    | 40708.423 |   1015967 |       24.96 |
 
 ### Home-Movies (go/deno/deno-docker)
 
@@ -87,8 +72,17 @@ Careful of caching. Even on Syno...
 | :------ | :---------- | -------: | --------: | ----------: |
 | galois  | deno        |   76.469 |    130075 |     1701.02 |
 | galois  | deno-docker |   95.905 |    130075 |     1356.36 |
-| galois  | go          |   77.660 |    130075 |     1674.93 |
 | davinci | deno        |  147.672 |    130075 |      880.84 |
-| davinci | go          |  137.182 |    130075 |      948.19 |
 | syno    | deno-docker |  332.970 |    130075 |      390.65 |
-| syno    | go          |   75.445 |    130075 |     1724.10 |
+| galois  | go          |   439.72 |    130075 |      295.81 |
+| davinci | go          |   963.39 |    130075 |      135.02 |
+| syno    | go          |   469.51 |    130075 |      277.04 |
+
+### Reading/audiobooks
+
+| Machine | Exec | Time (s) | Data (MB) | Rate (MB/s) |
+| :------ | :--- | -------: | --------: | ----------: |
+| galois  | go   |  1102.88 |    325593 |      295.22 |
+| galois  | deno |  1092.59 |    325593 |      298.00 |
+| davinci | go   |  2030.87 |    325593 |      160.32 |
+| syno    | go   |  2260.44 |    325593 |      144.04 |

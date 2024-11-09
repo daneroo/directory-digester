@@ -1,6 +1,6 @@
 # directory-digester Go implementation
 
-Not sure how to layout the directories yet. Especiall for a multi-language project.
+Not sure how to layout the directories yet. Especially for a multi-language project.
 See [this article](https://appliedgo.com/blog/go-project-layout/) for some ideas.
 
 ## Usage
@@ -16,7 +16,7 @@ For build:
 export VERSION=$(git describe --dirty --always)
 export COMMIT=$(git rev-parse --short HEAD)
 export BUILDDATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-go build -ldflags="-X 'main.version=${VERSION}' -X 'main.commit=${COMMIT}' -X 'main.buildDate=${BUILDDATE}'" go/cmd/reference/reference.go; 
+go build -ldflags="-X 'main.version=${VERSION}' -X 'main.commit=${COMMIT}' -X 'main.buildDate=${BUILDDATE}'" go/cmd/reference/reference.go;
 # run
 ./reference testDirectories/rootDir01/
 

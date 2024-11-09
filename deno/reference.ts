@@ -18,6 +18,12 @@ import {
 // not sure how these would be packaged exposed
 // when running from repo:url, (perhaps as a json file in the repo?)
 // but they could be injected into a docker build as BUILD ARGS
+// OR perhaps this? could work on github or npm,jsr??
+// what if it was a jsonc file?
+// const jsonURL = new URL('../package.json', import.meta.url);
+// const jsonText = await Deno.readTextFile(jsonURL);
+// const packageJson = JSON.parse(jsonText);
+
 const buildInfo = {
   // version: "0.0.0-dev",
   version: Deno.env.get("VERSION") ?? "0.0.0-dev",
@@ -70,6 +76,8 @@ async function digestNode(node: DigestTreeNode): Promise<void> {
   // const isFile = node.info.mode & 0o100000 === 0;
   const isFile = (await Deno.stat(node.path)).isFile;
   if (isFile) {
+    const start = Date.now();
+
     // Calculate the sha256 digest of the file
     const file = await Deno.open(node.path, { read: true });
     const readableStream = file.readable;
@@ -80,20 +88,37 @@ async function digestNode(node: DigestTreeNode): Promise<void> {
     const fileHash = toHashString(fileHashBuffer);
 
     node.info.sha256 = fileHash;
-    logVerbose(`digestNode(${node.path}) = ${node.info.sha256} (leaf)`);
+    const elapsed = (Date.now() - start) / 1000;
+    const sizeMB = node.info.size / (1024 * 1024);
+    const rate = sizeMB / elapsed;
+
+    logVerbose(
+      `digestNode(${node.path}) = ${
+        node.info.sha256
+      } (leaf) - size: ${sizeMB.toFixed(2)}MB elapsed: ${elapsed.toFixed(
+        2
+      )}s rate: ${rate.toFixed(2)} MB/s`
+    );
   } else {
     // Calculate the sha256 digest of the children
     const digester = new TextEncoder();
-    // for (const child of node.children) {
-    //   digester.encode(child.sha256);
-    // }
     const childSha256s = node.children.map((child) =>
       digester.encode(child.info.sha256)
     );
     const arrayHashBuffer = await crypto.subtle.digest("SHA-256", childSha256s);
     const arrayHash = toHashString(arrayHashBuffer);
     node.info.sha256 = arrayHash;
-    logVerbose(`digestNode(${node.path}) = ${node.info.sha256} (node)`);
+    // set size as sum of children's size (not the dir.stat.size)
+    node.info.size = node.children.reduce(
+      (sum, child) => sum + child.info.size,
+      0
+    );
+    const sizeMB = node.info.size / (1024 * 1024);
+    logVerbose(
+      `digestNode(${node.path}) = ${
+        node.info.sha256
+      } (node) size: ${sizeMB.toFixed(2)}MB`
+    );
   }
 }
 
@@ -154,10 +179,6 @@ function showAsIndented(
     maxLength = 100;
   }
   const pad = " ".repeat(depth * 2);
-  // const isDirIndicator = " "; // leaf or directory
-  // if node.Info.Mode.IsDir() {
-  // 	isDirIndicator = "/" //fmt.Sprintf("/ (%d)", len(node.Children))
-  // }
   console.log(
     `${pad}${node.info.name} - ${node.info.size} bytes digest:${node.info.sha256}`
   );
@@ -184,12 +205,14 @@ function showTreeAsJson(node: DigestTreeNode): void {
   console.log(JSON.stringify(list, null, 2));
 }
 
-// lets log to stderr - TODO turn this into loglevels?
+// lets log to stderr - TODO turn this into log levels?
+// deno-lint-ignore no-explicit-any
 function log(...data: any[]): void {
   console.error(`${new Date().toISOString()} -`, ...data);
 }
 
 let globalVerboseFlag = false;
+// deno-lint-ignore no-explicit-any
 function logVerbose(...data: any[]): void {
   if (globalVerboseFlag) {
     log(...data);
@@ -232,18 +255,27 @@ async function main() {
   log(
     `directory-digester v${buildInfo.version} commit:${buildInfo.commit} build:${buildInfo.buildDate} deno:${Deno.version.deno}`
   ); // TODO(daneroo): add version,buildDate
-  // log.Printf("directory-digester root: %s\n", rootDirectory)
-  log(`directory-digester root: ${rootDirectory}`); // TODO(daneroo): add version,buildDate
+  log(`directory-digester start root: ${rootDirectory}`); // TODO(daneroo): add version,buildDate
+  const start = Date.now();
 
   const rootNode = await buildTree(
     rootDirectory,
     await Deno.stat(rootDirectory)
   );
 
-  logVerbose(
-    `-- built tree: ${rootNode.info.name} (${rootNode.children.length})\n`
-  );
+  const elapsed = (Date.now() - start) / 1000; // convert to seconds
+  const sizeMB = rootNode.info.size / (1024 * 1024);
+  const rate = sizeMB / elapsed;
 
+  // This line is printed to stdout even if !verbose
+  // TODO(daneroo) add a silent flag to suppress even these
+  log(
+    `directory-digester done  root: ${rootNode.info.name} files: ${
+      rootNode.children.length
+    } - size: ${sizeMB.toFixed(2)}MB elapsed: ${elapsed.toFixed(
+      2
+    )}s rate: ${rate.toFixed(2)} MB/s`
+  );
   if (json) {
     showTreeAsJson(rootNode);
   } else {
