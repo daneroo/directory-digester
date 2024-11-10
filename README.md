@@ -60,11 +60,20 @@ We will need to balance CPU/digest and IO to optimize speed.
 ```bash
 # go verbose, text output
 time go run go/cmd/reference/reference.go --verbose testDirectories/rootDir01/
+docker run --rm -v "$(pwd)":/app -w /app golang:latest go run go/cmd/reference/reference.go testDirectories/
 # deno verbose, text output
 time deno run --allow-read --allow-env deno/reference.ts --verbose testDirectories/rootDir01/
+docker run --rm -v "$(pwd)":/app -w /app denoland/deno:latest deno run --allow-read --allow-env deno/reference.ts testDirectories/rootDir01/
 ```
 
 ### Archive
+
+| Machine | Exec | Time (s) |  Data (MB) | Rate (MB/s) |
+|:--------|:-----|---------:|-----------:|------------:|
+| galois  | go   |  3830.25 | 1015701.94 |      265.18 |
+| syno    | go   |  4009.89 | 1015701.94 |      253.30 |
+| davinci | go   |  6695.43 | 1015701.94 |      151.70 |
+| dirac   | go   |  8238.48 | 1015701.94 |      123.29 |
 
 ### Home-Movies (go/deno/deno-docker)
 
