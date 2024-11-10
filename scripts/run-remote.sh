@@ -28,7 +28,7 @@ for host in $HOSTS; do
         # Deno
         REPO_SRC="https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts"
         TARGET_DIR="Home-Movies/Tapes"
-        DENO_PERMS="--allow-read --allow-env"
+        DENO_FLAGS="--allow-read --allow-env"
         # Docker
         DOCKER_DENO_TAG="denoland/deno:latest"
 
