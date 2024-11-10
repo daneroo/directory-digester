@@ -1,13 +1,16 @@
 // fs is for walk
 // import * as mod from "https://deno.land/std@0.180.0/fs/mod.ts";
 // crypto.digest on a file: see https://examples.deno.land/hashing/ by https://www.linolevan.com/blog/tea_xyz
-import {
-  crypto,
-  toHashString,
-} from "https://deno.land/std@0.180.0/crypto/mod.ts";
+// import {
+//   crypto,
+//   toHashString,
+import { crypto } from "@std/crypto/crypto";
+import { encodeHex } from "@std/encoding";
+
 // TODO(daneroo): move external dependencies to deps.ts
-import { parse } from "https://deno.land/std@0.180.0/flags/mod.ts";
-import { basename, join } from "https://deno.land/std@0.180.0/path/mod.ts";
+// import { parse } from "https://deno.land/std@0.180.0/flags/mod.ts";
+import { parseArgs } from "@std/cli";
+import { basename, join } from "@std/path";
 
 // export VERSION=$(git describe --dirty --always)
 // export COMMIT=$(git rev-parse --short HEAD)
@@ -82,7 +85,7 @@ async function digestNode(node: DigestTreeNode): Promise<void> {
       "SHA-256",
       readableStream
     );
-    const fileHash = toHashString(fileHashBuffer);
+    const fileHash = encodeHex(new Uint8Array(fileHashBuffer));
 
     node.info.sha256 = fileHash;
     const elapsed = (Date.now() - start) / 1000;
@@ -103,7 +106,7 @@ async function digestNode(node: DigestTreeNode): Promise<void> {
       digester.encode(child.info.sha256)
     );
     const arrayHashBuffer = await crypto.subtle.digest("SHA-256", childSha256s);
-    const arrayHash = toHashString(arrayHashBuffer);
+    const arrayHash = encodeHex(new Uint8Array(arrayHashBuffer));
     node.info.sha256 = arrayHash;
     // set size as sum of children's size (not the dir.stat.size)
     node.info.size = node.children.reduce(
@@ -250,7 +253,7 @@ async function main() {
     // Define the directory to walk recursively
     // const root = "/Users/daniel/Downloads";
     _: [dirAsStrOrNum = "./go"],
-  } = parse(Deno.args, {
+  } = parseArgs(Deno.args, {
     boolean: ["json", "verbose"],
     default: { verbose: false },
   });

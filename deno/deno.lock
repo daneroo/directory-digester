@@ -1,0 +1,31 @@
+{
+  "version": "4",
+  "specifiers": {
+    "jsr:@std/cli@^1.0.6": "1.0.6",
+    "jsr:@std/crypto@^1.0.3": "1.0.3",
+    "jsr:@std/encoding@^1.0.5": "1.0.5",
+    "jsr:@std/path@^1.0.8": "1.0.8"
+  },
+  "jsr": {
+    "@std/cli@1.0.6": {
+      "integrity": "d22d8b38c66c666d7ad1f2a66c5b122da1704f985d3c47f01129f05abb6c5d3d"
+    },
+    "@std/crypto@1.0.3": {
+      "integrity": "a2a32f51ddef632d299e3879cd027c630dcd4d1d9a5285d6e6788072f4e51e7f"
+    },
+    "@std/encoding@1.0.5": {
+      "integrity": "ecf363d4fc25bd85bd915ff6733a7e79b67e0e7806334af15f4645c569fefc04"
+    },
+    "@std/path@1.0.8": {
+      "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
+    }
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@std/cli@^1.0.6",
+      "jsr:@std/crypto@^1.0.3",
+      "jsr:@std/encoding@^1.0.5",
+      "jsr:@std/path@^1.0.8"
+    ]
+  }
+}

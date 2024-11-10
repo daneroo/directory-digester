@@ -1,0 +1,14 @@
+{
+  "name": "@imetrical/directory-digester",
+
+  "exports": "./reference.ts",
+  "imports": {
+    "@std/cli": "jsr:@std/cli@^1.0.6",
+    "@std/crypto": "jsr:@std/crypto@^1.0.3",
+    "@std/encoding": "jsr:@std/encoding@^1.0.5",
+    "@std/path": "jsr:@std/path@^1.0.8"
+  },
+  "tasks": {
+    "outdated": "deno run -A jsr:@check/deps --allow-unused"
+  }
+}
