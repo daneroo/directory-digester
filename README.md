@@ -62,8 +62,8 @@ We will need to balance CPU/digest and IO to optimize speed.
 time go run go/cmd/reference/reference.go --verbose testDirectories/rootDir01/
 docker run --rm -v "$(pwd)":/app -w /app -e HOSTALIAS=$(hostname -s) golang:latest go run go/cmd/reference/reference.go testDirectories/
 # deno verbose, text output
-time deno run --allow-read --allow-env deno/reference.ts --verbose testDirectories/rootDir01/
-docker run --rm -v "$(pwd)":/app -w /app -e HOSTALIAS=$(hostname -s) denoland/deno:latest deno run --allow-read --allow-env deno/reference.ts testDirectories/rootDir01/
+time deno run --allow-sys --allow-read --allow-env deno/reference.ts --verbose testDirectories/rootDir01/
+docker run --rm -v "$(pwd)":/app -w /app -e HOSTALIAS=$(hostname -s) denoland/deno:latest deno run --quiet --allow-sys --allow-read --allow-env deno/reference.ts testDirectories/rootDir01/
 ```
 
 ### Archive

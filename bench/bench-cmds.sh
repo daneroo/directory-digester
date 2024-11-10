@@ -9,7 +9,8 @@ REPO_SRC="https://raw.githubusercontent.com/daneroo/directory-digester/main/deno
 
 # Home is about 23G
 BENCH_DIRECTORY="/Volumes/Space/Home-Movies/Tapes/"
-DENO_FLAGS="--quiet --allow-read --allow-env"
+# reload to bust the github src url cache (REPO_SRC)
+DENO_FLAGS="--quiet --reload --allow-sys --allow-read --allow-env"
 MACOS_VOLS="-v /Volumes/Space/:/Volumes/Space/:ro"
 SYNO_VOLS="-v /volume1/Home-Movies/:/Volumes/Space/Home-Movies:ro"
 DOCKER_DENO_TAG="denoland/deno:latest"

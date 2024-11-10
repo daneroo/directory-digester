@@ -27,8 +27,9 @@ for host in $HOSTS; do
         GO_BINARY='./directory-digester-reference'
         # Deno
         REPO_SRC="https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts"
+        # --reload` to bust the github src url cache (REPO_SRC)
+        DENO_FLAGS="--quiet --reload --allow-sys --allow-read --allow-env"
         TARGET_DIR="Home-Movies/Tapes"
-        DENO_FLAGS="--allow-read --allow-env"
         # Docker
         DOCKER_DENO_TAG="denoland/deno:latest"
 
