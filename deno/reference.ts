@@ -68,26 +68,36 @@ function newLeaf(path: string, info: Deno.FileInfo): DigestTreeNode {
   };
 }
 
+// Utility function to calculate SHA-256 digest
+async function digestBuffer(
+  data: BufferSource | AsyncIterable<BufferSource> | Iterable<BufferSource>
+): Promise<string> {
+  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+  return encodeHex(new Uint8Array(hashBuffer));
+}
+
+async function digestFile(path: string): Promise<string> {
+  const file = await Deno.open(path, { read: true });
+  const readableStream = file.readable;
+  const fileHash = await digestBuffer(readableStream);
+  return fileHash;
+}
+
 // digestNode: calculates the digest of a node
 // This can be invoked on a leaf node, or a directory node.
 // On the directory it is assumed that the children have been previously digested
 async function digestNode(node: DigestTreeNode): Promise<void> {
-  // TODO(daneroo): should get from node.info.mode
+  // TODO(daneroo): could get from node.info.mode
   // const isFile = node.info.mode & 0o100000 === 0;
+
   const isFile = (await Deno.stat(node.path)).isFile;
   if (isFile) {
     const start = Date.now();
 
-    // Calculate the sha256 digest of the file
-    const file = await Deno.open(node.path, { read: true });
-    const readableStream = file.readable;
-    const fileHashBuffer = await crypto.subtle.digest(
-      "SHA-256",
-      readableStream
-    );
-    const fileHash = encodeHex(new Uint8Array(fileHashBuffer));
-
+    // Use the digestFile function to calculate the sha256 digest of the file
+    const fileHash = await digestFile(node.path);
     node.info.sha256 = fileHash;
+
     const elapsed = (Date.now() - start) / 1000;
     const sizeMB = node.info.size / (1024 * 1024);
     const rate = sizeMB / elapsed;
@@ -100,14 +110,15 @@ async function digestNode(node: DigestTreeNode): Promise<void> {
       )}s rate: ${rate.toFixed(2)} MB/s`
     );
   } else {
-    // Calculate the sha256 digest of the children
+    // Calculate the sha256 digest of the children's own sha256 digests
     const digester = new TextEncoder();
     const childSha256s = node.children.map((child) =>
       digester.encode(child.info.sha256)
     );
-    const arrayHashBuffer = await crypto.subtle.digest("SHA-256", childSha256s);
-    const arrayHash = encodeHex(new Uint8Array(arrayHashBuffer));
+    const arrayHash = await digestBuffer(childSha256s);
+
     node.info.sha256 = arrayHash;
+
     // set size as sum of children's size (not the dir.stat.size)
     node.info.size = node.children.reduce(
       (sum, child) => sum + child.info.size,
