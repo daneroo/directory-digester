@@ -22,8 +22,8 @@ import (
 // go build -ldflags="-X 'main.version=${VERSION}' -X 'main.commit=${COMMIT}' -X 'main.buildDate=${BUILDDATE}'"
 var (
 	version   string = "v0.0.0-dev"
-	commit    string = "feedbac" // "c0ffee5"
-	buildDate string = time.Now().UTC().Format(time.RFC3339)
+	commit    string = "feedbac"              // "c0ffee5"
+	buildDate string = "1970-01-01T00:00:00Z" // must be static, not time.Now().UTC().Format(time.RFC3339)
 )
 
 type DigestTreeNode struct {
