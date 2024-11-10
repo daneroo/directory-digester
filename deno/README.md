@@ -20,9 +20,9 @@ time deno run --allow-read --allow-env https://raw.githubusercontent.com/daneroo
 # with docker  tag latest, or 2.0.4?
 # (on syno)
 docker pull denoland/deno:latest;
-time docker run --rm -it -v /volume1/Home-Movies/:/Volumes/Space/Home-Movies:ro denoland/deno:latest run --allow-read --allow-env https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts --verbose /Volumes/Space/Home-Movies/Tapes/
+time docker run --rm -it -v /volume1/Home-Movies/:/Volumes/Space/Home-Movies:ro denoland/deno:latest run --quiet --allow-read --allow-env https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts --verbose /Volumes/Space/Home-Movies/Tapes/
 
 # MacOS
 docker pull denoland/deno:latest;
-time docker run --rm -it -v /Volumes/Space/:/Volumes/Space/:ro denoland/deno:latest run --allow-read --allow-env https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts --verbose /Volumes/Space/Home-Movies/Tapes/
+time docker run --rm -it -v /Volumes/Space/:/Volumes/Space/:ro denoland/deno:latest run --quiet --allow-read --allow-env https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts --verbose /Volumes/Space/Home-Movies/Tapes/
 ```

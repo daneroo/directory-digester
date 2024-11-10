@@ -292,7 +292,7 @@ func main() {
 	}
 	// These two lines are printed to stderr even if !verboseFlag
 	// TODO(daneroo) add a silent flag to suppress even these
-	log.Printf("directory-digester %s - commit:%s - build:%s - %s\n", version, commit, buildDate, runtime)
+	log.Printf("directory-digester %s - commit:%s - build:%s - runtime:%s\n", version, commit, buildDate, runtime)
 
 	log.Printf("directory-digester start root: %s\n", rootDirectory)
 
@@ -318,7 +318,7 @@ func main() {
 		totalSizeMB,
 		elapsed,
 		rate)
-	// now as markdown (lod/stderr)
+	// now as markdown (stderr)
 	fmt.Fprintf(os.Stderr, "| Machine | Runtime | Time (s) |  Data (MB) | Rate (MB/s) |\n")
 	fmt.Fprintf(os.Stderr, "|:--------|:-----|---------:|-----------:|------------:|\n")
 	fmt.Fprintf(os.Stderr, "| %s | %s | %.2f | %.2f | %.2f |\n", hostname, runtime, elapsed, totalSizeMB, rate)

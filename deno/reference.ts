@@ -4,13 +4,10 @@
 import {
   crypto,
   toHashString,
-} from 'https://deno.land/std@0.180.0/crypto/mod.ts';
+} from "https://deno.land/std@0.180.0/crypto/mod.ts";
 // TODO(daneroo): move external dependencies to deps.ts
-import { parse } from 'https://deno.land/std@0.180.0/flags/mod.ts';
-import {
-  basename,
-  join,
-} from 'https://deno.land/std@0.180.0/path/mod.ts';
+import { parse } from "https://deno.land/std@0.180.0/flags/mod.ts";
+import { basename, join } from "https://deno.land/std@0.180.0/path/mod.ts";
 
 // export VERSION=$(git describe --dirty --always)
 // export COMMIT=$(git rev-parse --short HEAD)
@@ -28,7 +25,7 @@ const buildInfo = {
   // version: "0.0.0-dev",
   version: Deno.env.get("VERSION") ?? "0.0.0-dev",
   commit: Deno.env.get("COMMIT") ?? "feedbac", // "c0ffee5"
-  buildDate: Deno.env.get("BUILDDATE") ?? new Date().toISOString(),
+  buildDate: Deno.env.get("BUILDDATE") ?? new Date(0).toISOString(),
 };
 
 interface DigestTreeNode {
@@ -126,7 +123,6 @@ function ignoreName(name: string): boolean {
   const ignorePatterns = [".DS_Store", "@eaDir"];
   return ignorePatterns.some((pattern) => name.match(pattern) != null);
 }
-
 async function buildTree(
   parentPath: string,
   parentInfo: Deno.FileInfo
@@ -205,6 +201,32 @@ function showTreeAsJson(node: DigestTreeNode): void {
   console.log(JSON.stringify(list, null, 2));
 }
 
+function getRuntime(): string {
+  let runtimeVersion = `deno${Deno.version.deno}`;
+
+  // Check for the presence of the .dockerenv file
+  try {
+    Deno.statSync("/.dockerenv");
+    runtimeVersion += "-docker";
+  } catch {
+    // If the file doesn't exist, do nothing
+  }
+
+  return runtimeVersion;
+}
+
+function getHostname(): string {
+  // Check for HOSTALIAS environment variable
+  const hostAlias = Deno.env.get("HOSTALIAS");
+  if (hostAlias) {
+    return hostAlias;
+  }
+
+  // Fallback to the system's hostname
+  const hostname = Deno.hostname();
+  const hostnameParts = hostname.split(".");
+  return hostnameParts[0]; // Return the short hostname
+}
 // lets log to stderr - TODO turn this into log levels?
 // deno-lint-ignore no-explicit-any
 function log(...data: any[]): void {
@@ -252,8 +274,14 @@ async function main() {
 
   // These two lines are printed to stdout even if !verbose
   // TODO(daneroo) add a silent flag to suppress even these
+
+  // Add this inside your main function after calculating elapsed, sizeMB, and rate
+  const hostname = getHostname();
+  const runtime = getRuntime();
+
+  // Print markdown table to stderr
   log(
-    `directory-digester v${buildInfo.version} commit:${buildInfo.commit} build:${buildInfo.buildDate} deno:${Deno.version.deno}`
+    `directory-digester v${buildInfo.version} commit:${buildInfo.commit} build:${buildInfo.buildDate} runtime:${runtime}`
   ); // TODO(daneroo): add version,buildDate
   log(`directory-digester start root: ${rootDirectory}`); // TODO(daneroo): add version,buildDate
   const start = Date.now();
@@ -276,6 +304,15 @@ async function main() {
       2
     )}s rate: ${rate.toFixed(2)} MB/s`
   );
+
+  console.error("| Machine | Runtime | Time (s) |  Data (MB) | Rate (MB/s) |");
+  console.error("|:--------|:--------|---------:|-----------:|------------:|");
+  console.error(
+    `| ${hostname} | ${runtime} | ${elapsed.toFixed(2)} | ${sizeMB.toFixed(
+      2
+    )} | ${rate.toFixed(2)} |`
+  );
+
   if (json) {
     showTreeAsJson(rootNode);
   } else {
