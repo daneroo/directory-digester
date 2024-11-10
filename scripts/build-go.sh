@@ -56,10 +56,10 @@ cat << EOF
 # Pull the new binaries from this machine (${build_host})
 
 # from davinci, shannon: copy from galois"
-scp -p ${build_host}:${bin_dir}/reference.go-darwin-arm64 ./directory-digester-reference.go-darwin-arm64
-time ./directory-digester-reference.go-darwin-arm64 --verbose  /Volumes/Space/Home-Movies/Tapes/
+scp -p ${build_host}:${bin_dir}/reference.go-darwin-arm64 ./directory-digester-reference
+time ./directory-digester-reference --verbose  /Volumes/Space/Home-Movies/Tapes/
 
 # from syno: copy from galois
-scp -p ${build_host}:${bin_dir}/reference.go-linux-amd64 ./directory-digester-reference.go-linux-amd64
-time ./directory-digester-reference.go-linux-amd64 --verbose  /volume1/Home-Movies/Tapes/
+scp -p ${build_host}:${bin_dir}/reference.go-linux-amd64 ./directory-digester-reference
+time ./directory-digester-reference --verbose  /volume1/Home-Movies/Tapes/
 EOF
