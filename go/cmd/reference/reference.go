@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/daneroo/directory-digester/go/logsetup"
@@ -111,6 +112,7 @@ func digestNode(node *DigestTreeNode) error {
 	}
 	return nil
 }
+
 func ignoreName(name string) bool {
 	ignorePatterns := []string{".DS_Store", "@eaDir"}
 	for _, pattern := range ignorePatterns {
@@ -119,6 +121,39 @@ func ignoreName(name string) bool {
 		}
 	}
 	return false
+}
+
+func getHostname() string {
+	// Check for HOSTALIAS environment variable
+	// We use this in docker to set the 'reported' hostname
+	if hostAlias := os.Getenv("HOSTALIAS"); hostAlias != "" {
+		return hostAlias
+	}
+
+	// Fallback to the system's hostname
+	hostname, err := os.Hostname()
+	if err != nil {
+		return "unknown"
+	}
+
+	// Return the short hostname
+	if strings.Contains(hostname, ".") {
+		hostnameParts := strings.Split(hostname, ".")
+		return hostnameParts[0]
+	}
+
+	return hostname
+}
+
+func getRuntime() string {
+	runtimeVersion := runtime.Version()
+
+	// Check for the presence of the .dockerenv file
+	if _, err := os.Stat("/.dockerenv"); err == nil {
+		runtimeVersion += "-docker"
+	}
+
+	return runtimeVersion
 }
 
 func buildTree(parentPath string, parentInfo fs.FileInfo) (DigestTreeNode, error) {
@@ -247,6 +282,9 @@ func main() {
 	var jsonFlag = flag.Bool("json", false, "json output")
 	flag.Parse()
 
+	hostname := getHostname()
+	runtime := getRuntime()
+
 	// Define the directory to walk recursively
 	rootDirectory := "/Users/daniel/Downloads"
 	if flag.NArg() > 0 {
@@ -254,7 +292,7 @@ func main() {
 	}
 	// These two lines are printed to stderr even if !verboseFlag
 	// TODO(daneroo) add a silent flag to suppress even these
-	log.Printf("directory-digester %s - commit:%s - build:%s - %s\n", version, commit, buildDate, runtime.Version())
+	log.Printf("directory-digester %s - commit:%s - build:%s - %s\n", version, commit, buildDate, runtime)
 
 	log.Printf("directory-digester start root: %s\n", rootDirectory)
 
@@ -280,6 +318,11 @@ func main() {
 		totalSizeMB,
 		elapsed,
 		rate)
+	// now as markdown (lod/stderr)
+	fmt.Fprintf(os.Stderr, "| Machine | Runtime | Time (s) |  Data (MB) | Rate (MB/s) |\n")
+	fmt.Fprintf(os.Stderr, "|:--------|:-----|---------:|-----------:|------------:|\n")
+	fmt.Fprintf(os.Stderr, "| %s | %s | %.2f | %.2f | %.2f |\n", hostname, runtime, elapsed, totalSizeMB, rate)
+
 	if *jsonFlag {
 		showTreeAsJson(rootNode)
 	} else {
