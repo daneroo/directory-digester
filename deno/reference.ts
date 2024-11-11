@@ -267,6 +267,7 @@ async function main() {
   } = parseArgs(Deno.args, {
     boolean: ["json", "verbose"],
     default: { verbose: false },
+    // negatable: ["progress"], use this when default is true?
   });
 
   globalVerboseFlag = verbose;
