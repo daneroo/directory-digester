@@ -1,4 +1,5 @@
-import { MultiBar, Presets } from "npm:cli-progress";
+import { MultiBar, Presets, Format } from "npm:cli-progress";
+const { TimeFormat } = Format;
 import { format as formatSize } from "@std/fmt/bytes";
 import yoctoSpinner from "yocto-spinner";
 
@@ -58,7 +59,9 @@ async function processFile(fileStats: DirectoryStats, multibar: MultiBar) {
 
 async function processDirectory(dirStats: DirectoryStats, multibar: MultiBar) {
   const dirName = dirStats.path.split("/").pop() || dirStats.path;
-  const totalFormattedSize = formatSize(dirStats.totalBytes);
+  const totalFormattedSize = `${dirStats.totalEntries} files/dirs, ${formatSize(
+    dirStats.totalBytes
+  )}`;
   const dirBar = multibar.create(dirStats.totalBytes, 0, {
     filename: dirName,
     totalFormattedSize,
@@ -112,7 +115,7 @@ async function buildDirectoryStats(
       dirStats.totalBytes += childStats.totalBytes;
       dirStats.totalEntries += childStats.totalEntries;
     }
-    dirStats.totalEntries += 1; // Count this directory itself
+    dirStats.totalEntries += 1; // Count this directory itself?
   }
 
   // multibar.log(
@@ -141,13 +144,24 @@ async function processPhases(rootPath: string, multibar: MultiBar) {
   await new Promise((resolve) => setTimeout(resolve, 100));
 }
 
+// deno-lint-ignore no-explicit-any
+function paddedTimeFormat(t: any, options: any, roundToMultipleOf: any) {
+  const formatted = TimeFormat(t, options, roundToMultipleOf);
+  return formatted.padStart(7, " ");
+}
+
 const multibar = new MultiBar(
   {
     clearOnComplete: true,
     hideCursor: true,
+    fps: 2, // default is 10
     format:
-      " {bar} {percentage}% | ETA: {eta_formatted} | {value}/{totalFormattedSize} | {filename}",
+      " {bar} {percentage}% | ETA: {eta_formatted} | {totalFormattedSize} | {filename}",
+    //  {eta} is just in seconds, and not formatted.
     // " {bar} {percentage}% | ETA: {eta}s | {totalFormattedSize} | {filename}",
+    // pad the time format
+    // TimeFormat:= function formatTime(t, options, roundToMultipleOf){}
+    formatTime: paddedTimeFormat,
   },
   Presets.shades_classic
 );
