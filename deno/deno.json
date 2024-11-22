@@ -7,7 +7,9 @@
     "@std/crypto": "jsr:@std/crypto@^1.0.3",
     "@std/encoding": "jsr:@std/encoding@^1.0.5",
     "@std/fmt": "jsr:@std/fmt@^1.0.3",
-    "@std/path": "jsr:@std/path@^1.0.8"
+    "@std/path": "jsr:@std/path@^1.0.8",
+    "cli-progress": "npm:cli-progress@^3.12.0",
+    "yocto-spinner": "npm:yocto-spinner@^0.1.1"
   },
   "tasks": {
     "outdated": "deno run -A jsr:@check/deps --allow-unused"

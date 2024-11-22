@@ -28,3 +28,22 @@ time docker run --rm -it -v /volume1/Home-Movies/:/Volumes/Space/Home-Movies:ro 
 docker pull denoland/deno:latest;
 time docker run --rm -it -v /Volumes/Space/:/Volumes/Space/:ro denoland/deno:latest run --quiet --reload --allow-sys --allow-read --allow-env https://raw.githubusercontent.com/daneroo/directory-digester/main/deno/reference.ts --verbose /Volumes/Space/Home-Movies/Tapes/
 ```
+
+## Progress Bar
+
+Also, in prog-cli, we are not actuall digesting, it's just to test the UI and progress bars.
+
+We want to capture the state for the progress bar as you said:
+
+- bytes / totalBytes
+- entries / totalEntries
+
+we will do this in 2 phases.
+
+- phase 1: discover the count/sizes of files - to establish totals (all levels.)
+  - indeterminate progress bar (still with levels)
+- phase 2: second phase digest each file (although synthetic in this case.), and mark progress
+
+```bash
+deno run --allow-sys --allow-read --allow-env deno/prog-cli.ts /Volumes/Space/Reading/audiobooks/
+```

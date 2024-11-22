@@ -8,7 +8,9 @@
     "hashdeep",
     "ldflags",
     "logsetup",
-    "syno"
+    "multibar",
+    "syno",
+    "yocto"
   ],
   "deno.enable": true
 }

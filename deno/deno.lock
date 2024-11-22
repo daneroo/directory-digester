@@ -6,7 +6,9 @@
     "jsr:@std/encoding@^1.0.5": "1.0.5",
     "jsr:@std/fmt@^1.0.3": "1.0.3",
     "jsr:@std/path@^1.0.8": "1.0.8",
-    "npm:cli-progress@*": "3.12.0"
+    "npm:cli-progress@*": "3.12.0",
+    "npm:cli-progress@^3.12.0": "3.12.0",
+    "npm:yocto-spinner@~0.1.1": "0.1.1"
   },
   "jsr": {
     "@std/cli@1.0.6": {
@@ -54,6 +56,15 @@
       "dependencies": [
         "ansi-regex"
       ]
+    },
+    "yocto-spinner@0.1.1": {
+      "integrity": "sha512-vb6yztJdmbX9BwiR2NlKim7roGM5xFFhiTO6UstNiKBnh8NT6uFNjpXYC6DWTnLgRRyHh2nDNEM8kLHSRLw4kg==",
+      "dependencies": [
+        "yoctocolors"
+      ]
+    },
+    "yoctocolors@2.1.1": {
+      "integrity": "sha512-GQHQqAopRhwU8Kt1DDM8NjibDXHC8eoh1erhGAJPEyveY9qqVeXvVikNKrDz69sHowPMorbPUrH/mx8c50eiBQ=="
     }
   },
   "workspace": {
@@ -62,7 +73,9 @@
       "jsr:@std/crypto@^1.0.3",
       "jsr:@std/encoding@^1.0.5",
       "jsr:@std/fmt@^1.0.3",
-      "jsr:@std/path@^1.0.8"
+      "jsr:@std/path@^1.0.8",
+      "npm:cli-progress@^3.12.0",
+      "npm:yocto-spinner@~0.1.1"
     ]
   }
 }

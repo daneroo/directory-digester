@@ -1,70 +1,159 @@
 import { MultiBar, Presets } from "npm:cli-progress";
 import { format as formatSize } from "@std/fmt/bytes";
+import yoctoSpinner from "yocto-spinner";
 
-async function processFile(filePath: string, multibar: MultiBar) {
-  const fileInfo = await Deno.stat(filePath);
+interface DirectoryStats {
+  path: string; // full path to this entry
+  totalBytes: number; // total size including children
+  totalEntries: number; // total count including children
+  children: DirectoryStats[]; // ordered array of child stats
+  parent?: DirectoryStats; // pointer to parent directory (undefined for root)
+}
+
+function incrementProgressAndStats(
+  multibar: MultiBar,
+  dirStats: DirectoryStats,
+  bytes: number
+) {
+  // increment the progress bar for this directory
+  for (const bar of multibar.bars) {
+    bar.increment(bytes);
+  }
+  // increment the stats for this directory and all parents
+  let current: DirectoryStats | undefined = dirStats;
+  while (current !== undefined) {
+    current.totalBytes += bytes;
+    current = current.parent;
+  }
+}
+
+async function processFile(fileStats: DirectoryStats, multibar: MultiBar) {
+  const fileInfo = await Deno.stat(fileStats.path);
   const fileSize = fileInfo.size; // in bytes
   const totalFormattedSize = formatSize(fileSize);
 
-  const rate = 100_000_000; // bytes per second
+  const rate = 1_000_000_000; // bytes per second
   const steps = Math.ceil(fileSize / rate);
 
-  const fileName = filePath.split("/").pop() || filePath;
+  const fileName = fileStats.path.split("/").pop() || fileStats.path;
   const fileBar = multibar.create(fileSize, 0, {
     filename: fileName,
     totalFormattedSize,
   });
 
-  for (let i = 0; i < steps; i++) {
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate processing
-    const bytesProcessed = Math.min(rate, fileSize - fileBar.value);
-    fileBar.increment(bytesProcessed);
+  if (steps === 1) {
+    const waitTime = (fileSize / rate) * 1000;
+    await new Promise((resolve) => setTimeout(resolve, waitTime));
+    incrementProgressAndStats(multibar, fileStats, fileSize);
+  } else {
+    for (let i = 0; i < steps; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const bytesProcessed = Math.min(rate, fileSize - fileBar.value);
+      incrementProgressAndStats(multibar, fileStats, bytesProcessed);
+    }
   }
 
   multibar.remove(fileBar); // Remove the file progress bar after processing
 }
 
-async function processDirectory(directoryPath: string, multibar: MultiBar) {
-  const entries = [];
-  for await (const entry of Deno.readDir(directoryPath)) {
-    entries.push(entry);
-  }
-
-  entries.sort((a, b) => a.name.localeCompare(b.name));
-
-  const dirName = directoryPath.split("/").pop() || directoryPath;
-  const totalFormattedSize = `${entries.length} files`;
-  const dirBar = multibar.create(entries.length, 0, {
+async function processDirectory(dirStats: DirectoryStats, multibar: MultiBar) {
+  const dirName = dirStats.path.split("/").pop() || dirStats.path;
+  const totalFormattedSize = formatSize(dirStats.totalBytes);
+  const dirBar = multibar.create(dirStats.totalBytes, 0, {
     filename: dirName,
     totalFormattedSize,
   });
 
-  for (const entry of entries) {
-    const fullPath = `${directoryPath}/${entry.name}`;
-    if (entry.isDirectory) {
-      // multibar.log(`Processing directory: ${entry.name}\n`);
-      await processDirectory(fullPath, multibar);
-    } else if (entry.isFile) {
-      // multibar.log(`Processing file: ${entry.name}\n`);
-      await processFile(fullPath, multibar);
+  if (dirStats.children.length > 0) {
+    for (const childStats of dirStats.children) {
+      if (childStats.children.length > 0) {
+        await processDirectory(childStats, multibar);
+      } else {
+        // It's a file
+        await processFile(childStats, multibar);
+        // progress bars are only incremented in processFile
+      }
     }
-    dirBar.increment(); // Increment the directory progress bar for each processed child
+  }
+  multibar.remove(dirBar);
+}
+
+async function buildDirectoryStats(
+  path: string,
+  multibar: MultiBar
+): Promise<DirectoryStats> {
+  const entries: Deno.DirEntry[] = [];
+  const dirStats: DirectoryStats = {
+    path,
+    totalBytes: 0, // these will be updated below
+    totalEntries: 0, // these will be updated below
+    children: [],
+  };
+
+  const stat = await Deno.stat(path);
+
+  if (stat.isFile) {
+    dirStats.totalBytes = stat.size;
+    dirStats.totalEntries = 1;
+  } else {
+    // Read and sort directory entries
+    for await (const entry of Deno.readDir(path)) {
+      entries.push(entry);
+    }
+    entries.sort((a, b) => a.name.localeCompare(b.name));
+
+    // Process each entry
+    for (const entry of entries) {
+      const childPath = `${path}/${entry.name}`;
+      const childStats = await buildDirectoryStats(childPath, multibar);
+      childStats.parent = dirStats;
+
+      dirStats.children.push(childStats);
+      dirStats.totalBytes += childStats.totalBytes;
+      dirStats.totalEntries += childStats.totalEntries;
+    }
+    dirStats.totalEntries += 1; // Count this directory itself
   }
 
-  multibar.remove(dirBar); // Optionally remove the directory progress bar after processing
+  // multibar.log(
+  //   `Discovered: ${path} (${dirStats.totalEntries} entries, ${dirStats.totalBytes} bytes)\n`
+  // );
+  return dirStats;
+}
+
+async function processPhases(rootPath: string, multibar: MultiBar) {
+  // Phase 1: Discovery
+  const spinner = yoctoSpinner({ text: "Phase 1: Discovery" }).start();
+  // multibar.log("Phase 1: Discovery started\n");
+  const start1 = Date.now();
+  const rootDirStats = await buildDirectoryStats(rootPath, multibar);
+  const elapsed1 = Date.now() - start1;
+  // multibar.log(`Phase 1: Discovery completed in ${elapsed1}ms\n`);
+  spinner.success(`Phase 1: Discovery completed in ${elapsed1}ms`);
+
+  // Phase 2: Processing
+  multibar.log("Phase 2: Digest started\n");
+  const start2 = Date.now();
+  await processDirectory(rootDirStats, multibar);
+  const elapsed2 = Date.now() - start2;
+  multibar.log(`Phase 2: Digest completed in ${elapsed2}ms\n`);
+  // I don;t get the last log message if I don't wait
+  await new Promise((resolve) => setTimeout(resolve, 100));
 }
 
 const multibar = new MultiBar(
   {
-    clearOnComplete: false,
+    clearOnComplete: true,
     hideCursor: true,
     format:
-      " {bar} {percentage}% | ETA: {eta}s | {totalFormattedSize} | {filename}",
+      " {bar} {percentage}% | ETA: {eta_formatted} | {value}/{totalFormattedSize} | {filename}",
+    // " {bar} {percentage}% | ETA: {eta}s | {totalFormattedSize} | {filename}",
   },
   Presets.shades_classic
 );
 
 const rootPath = Deno.args[0] || "testDirectories/rootDir01/";
-await processDirectory(rootPath, multibar);
+
+await processPhases(rootPath, multibar);
 
 multibar.stop();
