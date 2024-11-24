@@ -140,8 +140,6 @@ async function processPhases(rootPath: string, multibar: MultiBar) {
   await processDirectory(rootDirStats, multibar);
   const elapsed2 = Date.now() - start2;
   multibar.log(`Phase 2: Digest completed in ${elapsed2}ms\n`);
-  // I don;t get the last log message if I don't wait
-  await new Promise((resolve) => setTimeout(resolve, 100));
 }
 
 // deno-lint-ignore no-explicit-any
@@ -154,7 +152,7 @@ const multibar = new MultiBar(
   {
     clearOnComplete: true,
     hideCursor: true,
-    fps: 2, // default is 10
+    // fps: 5.0, // default is 10
     format:
       " {bar} {percentage}% | ETA: {eta_formatted} | {totalFormattedSize} | {filename}",
     //  {eta} is just in seconds, and not formatted.
@@ -170,4 +168,6 @@ const rootPath = Deno.args[0] || "testDirectories/rootDir01/";
 
 await processPhases(rootPath, multibar);
 
+// I don;t get the last log message if I don't wait; seems related to fps
+await new Promise((resolve) => setTimeout(resolve, 100));
 multibar.stop();
